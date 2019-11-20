@@ -221,7 +221,7 @@ function getlatestdata()
 							td.onclick=function()
 							{	var previous=this;
 								var xhr=new XMLHttpRequest();
-								xhr.open("GET","/like/"+this.id,true);
+								xhr.open("GET","/like/"+this.id+"/"+email,true);
 								xhr.onload=function()
 								{
 									if(this.status==200)
@@ -246,7 +246,7 @@ function getlatestdata()
 							td.onclick=function()
 							{	var previous=this;
 								var xhr=new XMLHttpRequest();
-								xhr.open("GET","/dislike/"+this.id,true);
+								xhr.open("GET","/dislike/"+this.id+"/"+email,true);
 								xhr.onload=function()
 								{
 									if(this.status==200)
@@ -285,7 +285,7 @@ function getlatestdata()
 		}
 		
 		clearTimeout(time);
-		time=setTimeout(getlatestdata,2000);
+		time=setTimeout(getlatestdata,3000);
 		
 
 	}
@@ -296,6 +296,21 @@ function compose(){
             open("/compose","", "height=600,width=600,scrollbars=yes");
         }
 document.body.onload=function(){
+	//every blogger/ user should be subscribed to himself
+	var xhr=new XMLHttpRequest();
+	xhr.open("POST","/subscribeToBlog/"+email+"/"+email,true);
+	xhr.onload=function()
+	{
+		if(this.status==200)
+		{
+			console.log("subscribed");
+		}
+		else
+		{
+			console.log("some error");
+		}
+	}
+	xhr.send();
 	load_subscriber_info();
 	getlatestdata();
 }

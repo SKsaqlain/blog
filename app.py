@@ -280,18 +280,31 @@ def getLatestData(email):
 	return resp
 
 
-@app.route("/like/<bid>",methods=["GET"])
-def like(bid):
+@app.route("/like/<bid>/<email>",methods=["GET"])
+def like(bid,email):
 	print(bid)
+	print(email)
 	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
+	sql="select * from likes where email='%s' and bid=%d"%(email,int(bid));
+	if(cursor.execute(sql)):
+		resp=jsonify()
+		resp.status_code=400
+		cursor.close()
+		db.close()
+		return resp
+
 	sql="select likes from blog where id=%d"%(int(bid))
 	cursor.execute(sql);
 	likes=int(cursor.fetchone()[0])
 	print(likes)
+	
 	sql="update blog set likes=%d where id='%s'"%(likes+1,bid)
-
-	if(cursor.execute(sql)>0):
+	cursor.execute(sql)
+	db.commit()
+	sql="insert into likes(email,bid) values('%s',%d)"%(email,bid);
+	if(cursor.execute(sql)):
+		db.commit()
 		print("like incremented")
 		db.commit()
 		resp=jsonify({})
@@ -307,17 +320,27 @@ def like(bid):
 		db.close()
 		return resp
 
-@app.route("/dislike/<bid>",methods=["GET"])
-def dislike(bid):
+@app.route("/dislike/<bid>/<email>",methods=["GET"])
+def dislike(bid,email):
 	print(bid)
+	print(email)
 	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
+	sql="select * from dislikes where email='%s' and bid=%d"%(email,bid)
+	if(cursor.execute(sql)):
+		resp=jsonify()
+		resp.status_code=400
+		cursor.close()
+		db.close()
+		return resp
 	sql="select dislikes from blog where id=%d"%(int(bid))
 	cursor.execute(sql);
 	dislikes=int(cursor.fetchone()[0])
 	print(dislikes)
 	sql="update blog set dislikes=%d where id='%s'"%(dislikes+1,bid)
-
+	cursor.execute(sql)
+	db.commit()
+	sql="insert into dislikes(email,bid) values(%s,%d)"%(email,bid)
 	if(cursor.execute(sql)>0):
 		print("dislike incremented")
 		db.commit()
@@ -388,7 +411,7 @@ def add__get_reply():
 				db.close()
 				return resp
 			else:
-				time.sleep(1)
+				time.sleep(2)
 
 		resp=jsonify({})
 		resp.status_code=400
