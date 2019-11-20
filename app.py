@@ -279,11 +279,11 @@ def like(bid):
 	print(bid)
 	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
-	sql="select like from blog where id=%d"%(int(mid))
+	sql="select likes from blog where id=%d"%(int(bid))
 	cursor.execute(sql);
 	likes=int(cursor.fetchone()[0])
 	print(likes)
-	sql="update table like set likes=%d where id='%s'"%(likes+1,bid)
+	sql="update blog set likes=%d where id='%s'"%(likes+1,bid)
 
 	if(cursor.execute(sql)>0):
 		print("like incremented")
@@ -306,11 +306,11 @@ def dislike(bid):
 	print(bid)
 	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
-	sql="select dislike from blog where id=%d"%(int(mid))
+	sql="select dislikes from blog where id=%d"%(int(bid))
 	cursor.execute(sql);
 	dislikes=int(cursor.fetchone()[0])
 	print(dislikes)
-	sql="update table like set dislikes=%d where id='%s'"%(dislikes+1,bid)
+	sql="update blog set dislikes=%d where id='%s'"%(dislikes+1,bid)
 
 	if(cursor.execute(sql)>0):
 		print("dislike incremented")

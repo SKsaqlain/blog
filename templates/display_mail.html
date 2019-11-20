@@ -135,7 +135,7 @@ td{
 						main_thread.appendChild(tr);
 
 						//generate the reply form onlu after constructing the main thread (the  emails are coming null theats why)
-						mark_main_thread_read();
+						// mark_main_thread_read();
 						time=setTimeout(display_reply);
 						generate_reply_form();
 
@@ -164,7 +164,7 @@ td{
 				var se=document.createElement("input");
 				se.setAttribute("type","hidden");
 				se.setAttribute("name","send_email");
-				se.setAttribute("value",send_email);
+				se.setAttribute("value",localStorage.getItem("email"));
 				form.appendChild(se);
 
 
