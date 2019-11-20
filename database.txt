@@ -1,30 +1,18 @@
-#create a containarized database server
+create database
+create database blog;
+use blog;
 
-1)pull the image
-$docker pull mysql/mysql-server:latest
+create table user(email VARCHAR(100) PRIMARY KEY ,username VARCHAR(100) NOT NULL,password VARCHAR(100) NOT NULL,phonenumber INT,blockstate INT DEFAULT 0);
 
-
-2)create a container
-$docker run --name db -e MYSQL_ROOT_HOST=% -p 3306:3306 -d mysql/mysql-server
-
-3)get the default password(//copy the shown password//)
-$docker logs db 2>&1
-
-4)paste the password  here
-$docker exec -it db mysql -u root -p 
-
-5)change the default password
-ALTER USER 'root'@'localhost' IDENTIFIED BY '123';
-ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY '123';
-ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY '123';
+create table category(id INT PRIMARY KEY,category VARCHAR(50));
 
 
 
+create table blog(id INT AUTO_INCREMENT PRIMARY KEY,blogger_id int,send_email VARCHAR(20) NOT NULL,subject VARCHAR(10),body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,likes INT,dislikes INT,category_id INT); 
 
-6)create database
-create database mailIt;
-use mailIt;
-create table email(id INT AUTO_INCREMENT PRIMARY KEY,send_email VARCHAR(20) NOT NULL, recv_email VARCHAR(20) NOT NULL,subject VARCHAR(10),body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,spam INT DEFAULT 0,star INT DEFAULT 0,send_eread INT DEFAULT 1,recv_eread INT DEFAULT 0); 
-create table user(email VARCHAR(100) PRIMARY KEY ,username VARCHAR(100) NOT NULL,password VARCHAR(100) NOT NULL);
-create table spam_check_log(id INT PRIMARY KEY);
-create table reply(id INT AUTO_INCREMENT PRIMARY KEY,mid INT,send_email VARCHAR(20) NOT NULL, recv_email VARCHAR(20) NOT NULL,body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY(mid) REFERENCES email(id) on DELETE CASCADE); 
+
+create table comment(id INT AUTO_INCREMENT PRIMARY KEY,bid INT,send_email VARCHAR(20) NOT NULL, recv_email VARCHAR(20) NOT NULL,body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY(bid) REFERENCES blog(id) on DELETE CASCADE); 
+
+
+create table blogger(id INT AUTO_INCREMENT PRIMARY KEY,email VARCHAR(20))
+
