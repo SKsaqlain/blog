@@ -16,3 +16,4 @@ create table comment(id INT AUTO_INCREMENT PRIMARY KEY,bid INT,send_email VARCHA
 
 create table blogger(id INT AUTO_INCREMENT PRIMARY KEY,email VARCHAR(20))
 
+create table subscribe(recv_email VARCHAR(20),blogger_email VARCHAR(20));
