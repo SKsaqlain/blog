@@ -170,7 +170,7 @@ def get_blogger():
 	if(len(rows)>0):
 		message=[]
 		for blogger in  rows:
-			message.append(dict(zip(blog_column,blogger)))
+			message.append(dict(zip(blogger_column,blogger)))
 		print(message)
 		resp=jsonify(message)
 		resp.status_code=200
@@ -182,7 +182,7 @@ def get_blogger():
 	db.close()
 	return resp
 
-@app.route("/subscribeToBlog/<email>/<blogger_email>",methods=["GET"])
+@app.route("/subscribeToBlog/<email>/<blogger_email>",methods=["POST"])
 def subscribeToBlog(email,blogger_email):
 	print(email)
 	# blogger_email=request.form["bloggers"]
