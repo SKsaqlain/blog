@@ -76,6 +76,63 @@ time=null;
 flag=0
 email=localStorage.getItem("email");
 
+
+function load_subscriber_info()
+{	console.log("load_subscriber_info");
+	var xhr=new XMLHttpRequest();
+	xhr.open("GET","/get_bloggers",true);
+	xhr.onload=function()
+	{
+		if(this.status==200)
+		{	var data=JSON.parse(this.responseText);
+			console.log(data);
+			var form=document.getElementById("subscribe_blogger");
+			var select=document.createElement("select");
+			select.setAttribute("id","bloggers");
+			select.setAttribute("name","blogger");
+			select.setAttribute("required","required");
+
+			for(var i=0;i<data.length;i++)
+			{
+				var option=document.createElement("option");
+				option.setAttribute("value",data[i]["send_email"]);
+				option.innerHTML=data[i]["send_email"];
+				select.appendChild(option);
+			}
+			form.appendChild(select);
+
+		}
+		else
+		{
+			console.log("some error occured");
+		}
+	}
+	xhr.send();
+}
+
+
+function subscribeToBlog()
+{	var email=localStorage.getItem("email");
+	var form=document.getElementById("subscribe_blogger");
+	var blogger=form["blogger"].value;
+	console.log("subscribeToBlog:"+blogger);
+	
+	var xhr=new XMLHttpRequest();
+	xhr.open("GET","/subscribeToBlog/"+email+"/"+blogger,true);
+	xhr.onload=function()
+	{
+		if(this.status==200)
+		{
+			console.log("subscribed");
+		}
+		else
+		{
+			console.log("some error");
+		}
+	}
+	xhr.send();
+
+}
 	
 function getlatestdata()
 {
@@ -216,64 +273,15 @@ function getlatestdata()
 function compose(){
             open("/compose","", "height=600,width=600,scrollbars=yes");
         }
-function load_subscriber_info()
-{
-	var xhr=new XMLHttpRequest();
-	xhr.open("/get_bloggers","GET",true);
-	xhr.onload=function()
-	{
-		if(this.status==200)
-		{	var data=JSON.parse(this.responseText);
-			var form=document.getElementById("subscribe_blogger");
-			var select=document.createElement("select");
-			select.setAttribute("id","bloggers");
-			select.setAttribute("name","blogger");
-			select.setAttribute("required","required");
 
-			for(var i=0;i<data.length;i++)
-			{
-				var option=document.createElement("option");
-				option.setAttribute("value",data[i]["email"]);
-				option.innerHTML=data[i]["email"];
-				select.appendChild(option);
-			}
-			form.appendChild(select);
 
-		}
-		else
-		{
-			console.log("some error occured");
-		}
-	}
-	xhr.send();
-}
-function subscribeToBlog()
-{	var email=localStorage.getItem("email");
-	var form=document.getElementById("subscribe_blogger");
-	var fm=new FormData(form);
-	var xhr=new XMLHttpRequest();
-	xhr.open("POST","/subscribeToBlog/"+email,true);
-	xhr.onload=function()
-	{
-		if(this.status==200)
-		{
-			console.log("subscribed");
-		}
-		else
-		{
-			console.log("some error");
-		}
-	}
-	xhr.send(fm);
-
-}
 </script>
 
 
 <body onload="getlatestdata()">
 	<div id="blogger_display">
-		<form method="POST" action="/subscribe" id="subscribe_blogger">
-			<button onclik="subscribeTobBlog()">Submit</button>
+		<form  id="subscribe_blogger">
+			<button onclick="subscribeToBlog()">Submit</button>
 		</form>
 	</div>
 	<div>
