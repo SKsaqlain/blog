@@ -85,8 +85,6 @@
                             <input  type="file" name="file" autocomplete="off" required>
                         </form>
                         <br/>
-                        <input type="text" id="to" name="to" placeholder="To" onblur="loader.check_email(this)" required class="text">
-                        <br/>
                         <input type="text" id="subject" name="subject" placeholder="Subject" class="text">
                     </div>
                     <div id="editor-text" class="textdivi" contenteditable="true" spellcheck="false"></div>
@@ -118,7 +116,6 @@ document.getElementById("editor-text").appendChild(body.documentElement);
     console.log(editor_body);
 
     subject=document.getElementById("subject").value;
-    to=document.getElementById("to").value;
     // console.log(subject)
     xhr=new XMLHttpRequest();
     xhr.open("POST","/compose_send",true);
