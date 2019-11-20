@@ -301,7 +301,7 @@ def like(bid):
 		return resp
 
 @app.route("/dislike/<bid>",methods=["GET"])
-def like(bid):
+def dislike(bid):
 	print(bid)
 	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
