@@ -77,6 +77,30 @@ flag=0
 email=localStorage.getItem("email");
 
 
+function subscribeToBlog()
+{	console.log("here");
+	var email=localStorage.getItem("email");
+	var form=document.getElementById("subscribe-form");
+	var blogger=form["blogger"].value;
+	console.log("subscribeToBlog:"+blogger);
+	
+	var xhr=new XMLHttpRequest();
+	xhr.open("GET","/subscribeToBlog/"+email+"/"+blogger,true);
+	xhr.onload=function()
+	{
+		if(this.status==200)
+		{
+			console.log("subscribed");
+		}
+		else
+		{
+			console.log("some error");
+		}
+	}
+	xhr.send();
+
+}
+
 function load_subscriber_info()
 {	console.log("load_subscriber_info");
 	var xhr=new XMLHttpRequest();
@@ -100,6 +124,10 @@ function load_subscriber_info()
 				select.appendChild(option);
 			}
 			form.appendChild(select);
+			var button=document.createElement("button");
+			button.innerHTML="Subscribe";
+			button.onclick=subscribeToBlog();
+			form.appendChild(button);
 
 		}
 		else
@@ -111,28 +139,7 @@ function load_subscriber_info()
 }
 
 
-function subscribeToBlog()
-{	var email=localStorage.getItem("email");
-	var form=document.getElementById("subscribe-form");
-	var blogger=form["blogger"].value;
-	console.log("subscribeToBlog:"+blogger);
-	
-	var xhr=new XMLHttpRequest();
-	xhr.open("GET","/subscribeToBlog/"+email+"/"+blogger,true);
-	xhr.onload=function()
-	{
-		if(this.status==200)
-		{
-			console.log("subscribed");
-		}
-		else
-		{
-			console.log("some error");
-		}
-	}
-	xhr.send();
 
-}
 	
 function getlatestdata()
 {
@@ -281,7 +288,7 @@ function compose(){
 <body onload="getlatestdata()">
 	<div id="blogger_display">
 		<form  id="subscribe-form">
-			<button onclick="subscribeToBlog()">Subscribe</button>
+			
 		</form>
 	</div>
 	<div>

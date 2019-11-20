@@ -182,8 +182,8 @@ def get_blogger():
 	db.close()
 	return resp
 
-@app.route("/subscribeTOBlog/<email>/<blogger_email>",methods=["POST"])
-def subscribeToBlog(email,blogger):
+@app.route("/subscribeToBlog/<email>/<blogger_email>",methods=["GET"])
+def subscribeToBlog(email,blogger_email):
 	print(email)
 	# blogger_email=request.form["bloggers"]
 	print(blogger_email)
@@ -195,10 +195,10 @@ def subscribeToBlog(email,blogger):
 		resp=jsonify()
 		resp.status_code=400
 	else:
-		sql="insert into subscribe(recv_eamil,blogger_email) values('%s','%s')"%(email,blogger_email)
+		sql="insert into subscribe(recv_email,blogger_email) values('%s','%s')"%(email,blogger_email)
 		cursor.execute(sql)
 		db.commit()
-		resp=jsonify(message)
+		resp=jsonify()
 		resp.status_code=200
 		
 	cursor.close()
