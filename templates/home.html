@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>home</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+<style type="text/css">
+
+body{
+	background-image: url("/static/img/mail.png");
+	background-size: cover;
+}
+.rmail-div{
+	background-color:rgb(24, 211, 218);
+	
+	width:90%;
+	height:80%;
+	border-radius: 25px;
+	padding: 25px;
+	margin-left: 5%;
+	margin-top:02%;
+	/* opacity: 0.8; */
+}
+
+button{
+	background-color: rgb(61, 170, 61);
+	border-radius : 10px;
+	border-collapse: collapse;
+	border: none;
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+	color:white;
+	padding:10px;
+	margin: 20px auto;
+	display: block;
+	cursor: pointer;
+	
+	
+}
+.star{
+	font-size: 35px;
+}
+.spam{
+	font-size:35px;
+}
+
+
+.highight-menu {
+    background-color: #777777 !important;
+    color: white !important;
+}
+
+.checked{
+    color:orange;
+}
+.uncheck{
+    color:white;
+}
+table{
+    border-bottom:2px solid grey;
+	display: block;
+	margin:0 auto;
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+	font-weight: 400;
+	text-align: center;
+}
+.rmail-div:hover{background-color: rgb(0, 255, 242);}
+</style>
+
+</head>
+<script type="text/javascript">
+	//latest mail id
+	lmid=null;
+	time=null;
+	//variable used to record the lateset time
+	flag=0
+	email=localStorage.getItem("email");
+	
+	
+function getlatestdata()
+{
+	var xhr=new XMLHttpRequest();
+	xhr.open("GET","/getData/"+email+"/latest",true);
+
+	xhr.onload=
+	function()
+	{
+		if(this.status==200)
+		{
+			data=JSON.parse(this.responseText);
+			lmid=data[0]["id"];
+			//console.log(lmid)
+			alert(data.length+" new mails received/modified");
+			var rmail_disp=document.getElementById("rmail_disp");
+			if(data.length>0)
+			{
+				for(var i=data.length-1;i>=0;i--)
+				{
+					var division=document.createElement("div");
+					division.classList="rmail-div";
+					var mail=data[i];
+
+					var table=document.createElement("table");
+					table.id=mail["id"];
+					table.class="table"+mail["id"];
+				
+                    
+						tr=document.createElement("tr");
+						
+							td=document.createElement("td");
+                            td.width="100px";
+							td.id=mail["id"];
+							td.innerHTML=mail["send_email"]+"->"+mail["recv_email"];
+							td.onclick=function ()
+							{	var url="/redirect_display_mail";
+								localStorage.setItem("mid",this.id);
+								// open(url,"","height=600,width=600,scrollbars=yes");
+								window.open(url);
+								// window.location.assign(url);
+							}
+							tr.appendChild(td);
+
+							td=document.createElement("td");
+							td.width="100px";
+							td.innerHTML=mail["subject"];
+							tr.appendChild(td);
+
+							td=document.createElement("td");
+							td.id=mail["id"]+"spam";
+							td.class="spam"+mail["id"]+" "+mail["spam"];
+							// console.log(td.class);
+							td.width="100px";
+							td.classList+="spam";
+							td.onclick=function(){
+								var xhr=new XMLHttpRequest();
+								url="/spam/"+table.id;
+								xhr.open("GET",url,true);
+								xhr.send();
+								xhr.onload=function(){
+									if(this.status==200){
+										
+										console.log("marked");
+										d=document.getElementById(mail["id"]+"spam").parentNode.parentNode.parentNode;
+										d.parentNode.removeChild(d);
+										d=document.getElementById(mail["id"]);
+
+										d.parentNode.removeChild(d);
+										
+										
+									}
+									else{
+										alert("Unable to mark");
+									}
+								}
+							}
+							if(mail["spam"]){
+								td.innerHTML="!";
+								td.style.color="red";
+							}
+							else{
+								td.innerHTML="!";
+								td.style.color="white";
+							}
+							tr.appendChild(td);
+
+
+							td=document.createElement("td");
+							td.width="100px";
+							td.classList+="star";
+							td.id=mail["id"]+"star";
+							td.onclick=function(){
+								var xhr=new XMLHttpRequest();
+								url="/star/"+table.id;
+								xhr.open("GET",url,true);
+								xhr.send();
+								xhr.onload=function(){
+									if(this.status==200){
+										
+										console.log("stared");
+										d=document.getElementById(mail["id"]+"star").parentNode.parentNode.parentNode;
+										d.parentNode.removeChild(d);
+										d=document.getElementById(mail["id"]);
+
+										d.parentNode.removeChild(d);
+									}
+									else{
+										alert("Unable to star");
+									}
+								}
+							}
+							if(mail["star"]){
+								// td.innerHTML="Starred";
+								td.innerHTML="&#9734";
+								td.style.color="yellow";
+								
+							}
+							else{
+								// td.innerHTML="Star?";
+								td.innerHTML="&#9734";
+								td.style.color="white";
+								// td.style.font=;
+								td.style.fontSize=400;
+							}
+							tr.appendChild(td);
+							
+
+							td=document.createElement("td");
+							td.width="200px";
+							td.innerHTML=mail["date"];
+							if(flag==0)
+							{
+								lmid=mail["id"];
+								flag=1;
+							}
+							tr.appendChild(td);
+						table.appendChild(tr);
+
+						
+					button=document.createElement("button");
+					button.innerHTML="delete";
+					button.id=mail["id"];
+					button.onclick=function()
+					{
+						var url="/delete_mail/"+this.id;
+						var id=this.id;
+						var xhr=new XMLHttpRequest();
+						xhr.open("DELETE",url,true);
+						xhr.onload=function()
+						{	if(this.status==200)
+							{
+								console.log("deleted mail");
+								// var tables=document.getElementsByTagName("table");
+								// 			for(i=0;i<tables.length;i++)
+								// 			{
+								// 				if(tables[i].id==id)
+								// 					tables[i].parentNode.removeChild(tables[i]);
+								// 			}
+											
+								this.abort();
+								//getData();
+							}
+							else
+							{
+								console.log("failed to delete mail");
+							}
+
+						}
+						xhr.send();
+						this.parentNode.removeChild(this.previousSibling);
+						this.parentNode.removeChild(this);
+						
+						
+						
+					}
+					//checking whether table already exists  or nto
+					
+
+					var etable=document.querySelector(".table"+mail["id"]);
+					if(etable!=null)
+					{	//reoving button element
+						rmail_disp.removeChild(etable.nextSibling)
+						rmail_disp.removeChild(etable);
+
+					}
+						division.appendChild(table);
+						// rmail_disp.insertBefore(division);
+						rmail_disp.insertBefore(button,rmail_disp.childNodes[0]);
+						rmail_disp.insertBefore(division,rmail_disp.childNodes[0]);
+					
+				}
+			}
+					
+
+		}
+		
+		clearTimeout(time);
+		time=setTimeout(getlatestdata,2000);
+		
+
+	}
+	xhr.send();
+}
+function compose(){
+            open("/compose","", "height=600,width=600,scrollbars=yes");
+        }
+
+</script>
+<body onload="getlatestdata()">
+	<div>
+        <button onclick="compose(this)" style="margin-top:100px" >Compose New Mail</button>
+    </div>
+    <div id="rmail_disp" class="rmail">
+    </div>
+
+    
+
+
+</body>
+</html>

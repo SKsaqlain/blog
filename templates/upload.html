@@ -1,0 +1,71 @@
+<!doctype html>
+<html>
+<title>Python Flask File Upload Example</title>
+
+<body>
+<h2>Select a file to upload</h2>
+<p>
+	{% with messages = get_flashed_messages() %}
+	  {% if messages %}
+		<ul class=flashes>
+		{% for message in messages %}
+		  <li>{{ message }}</li>
+		{% endfor %}
+		</ul>
+	  {% endif %}
+	{% endwith %}
+</p>
+<script>
+ function send_form()
+ {	console.log("here");
+ 	var form = document.getElementById('upload_image');
+	var formData = new FormData(form);
+	// var file = form.files[0];
+	// formData.append('file', file);
+	var xhr = new XMLHttpRequest();
+	xhr.responseType="JSON"
+	xhr.onload=function(e){
+			var file_path=JSON.parse(xhr.response);
+			if(file_path.indexOf('png')!=-1 || file_path.indexOf('jpg')!=-1 || file_path.indexOf('jpeg')!=-1)
+			{
+				img_element=document.createElement("img");
+				img_element.src=file_path
+				img_element.style.width="100px";
+				img_element.style.height="100px";
+				document.body.appendChild(img_element);
+			}
+			else
+			{
+				a=document.createElement("a");
+				a.href=file_path;
+				f_name=file_path[0].split("/")
+				f_name=f_name[f_name.length-1]
+				a.innerHTML=f_name
+				document.body.appendChild(a);
+			}
+	}
+	// Add any event handlers here...
+	xhr.open('POST', form.getAttribute('action'), true);
+	xhr.send(formData);
+	//return false; // To avoid actual submission of the form
+
+ }
+	</script>
+<div>
+<form method="post" action="/" enctype="multipart/form-data" target="hframe" id="upload_image">
+    <dl>
+		<p>
+			<input type="file" name="file" autocomplete="off" required>
+		</p>
+    </dl>
+    <p>
+		<button onclick="send_form()">Submit</button>
+	</p>
+</form>
+</div>
+
+
+
+
+</body>
+</html>
