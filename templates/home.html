@@ -85,7 +85,7 @@ function subscribeToBlog()
 	console.log("subscribeToBlog:"+blogger);
 	
 	var xhr=new XMLHttpRequest();
-	xhr.open("GET","/subscribeToBlog/"+email+"/"+blogger,true);
+	xhr.open("POST","/subscribeToBlog/"+email+"/"+blogger,true);
 	xhr.onload=function()
 	{
 		if(this.status==200)
@@ -98,7 +98,7 @@ function subscribeToBlog()
 		}
 	}
 	xhr.send();
-
+	
 }
 
 function load_subscriber_info()
@@ -108,25 +108,24 @@ function load_subscriber_info()
 	xhr.onload=function()
 	{
 		if(this.status==200)
-		{	var data=JSON.parse(this.responseText);
+		{	var data=JSON.parse(this.response);
 			console.log(data);
 			var form=document.getElementById("subscribe-form");
 			var select=document.createElement("select");
-			select.setAttribute("id","bloggers");
+			select.setAttribute("id","blogger");
 			select.setAttribute("name","blogger");
-			select.setAttribute("required","required");
-
+			select.setAttribute("required",true);
 			for(var i=0;i<data.length;i++)
 			{
 				var option=document.createElement("option");
-				option.setAttribute("value",data[i]["send_email"]);
-				option.innerHTML=data[i]["send_email"];
+				option.setAttribute("value",data[i]["email"]);
+				option.innerHTML=data[i]["email"];
 				select.appendChild(option);
 			}
 			form.appendChild(select);
 			var button=document.createElement("button");
 			button.innerHTML="Subscribe";
-			button.onclick=subscribeToBlog();
+			button.onclick=subscribeToBlog;
 			form.appendChild(button);
 
 		}
