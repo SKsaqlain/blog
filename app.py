@@ -253,15 +253,21 @@ def getLatestData(email):
 		for each_mail in data:
 			message.append(dict(zip(blog_column,each_mail)))
 		data=message
-		message_to_be_sent=[]
-		for ele in data:
-			if(ele not in  session["previous_mails"]):
-				message_to_be_sent.append(ele)
-		print(len(message_to_be_sent))
-		session["previous_mails"].extend(message_to_be_sent)
+		# message_to_be_sent=[]
+		# for ele in data:
+		# 	if(ele not in  session["previous_mails"]):
+		# 		message_to_be_sent.append(ele)
+		# print(len(message_to_be_sent))
+		#session["previous_mails"].extend(message_to_be_sent)
 		session.modified=True
-		resp=jsonify(message_to_be_sent)
-		if(len(message_to_be_sent)>0):
+		# resp=jsonify(message_to_be_sent)
+		resp=jsonify(message)
+		# if(len(message_to_be_sent)>0):
+		# 	resp.status_code=200
+		# 	cursor.close()
+		# 	db.close()
+		# 	return resp
+		if(len(message)>0):
 			resp.status_code=200
 			cursor.close()
 			db.close()

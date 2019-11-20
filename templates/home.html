@@ -67,7 +67,22 @@ table{
 </style>
 
 </head>
+<body >
+	<div id="blogger_display">
+		<form  id="subscribe-form">
+			
+		</form>
+	</div>
+	<div>
+        <button onclick="compose(this)" style="margin-top:100px" >Compose New Mail</button>
+    </div>
+    <div id="rmail_disp" class="rmail">
+    </div>
 
+    
+
+
+</body>
 <script type="text/javascript">
 //latest mail id
 lmid=null;
@@ -152,8 +167,9 @@ function getlatestdata()
 			data=JSON.parse(this.responseText);
 			lmid=data[0]["id"];
 			//console.log(lmid)
-			alert(data.length+" new mails received/modified");
+			console.log(data.length+" new mails received/modified");
 			var rmail_disp=document.getElementById("rmail_disp");
+			rmail_disp.innerHTML="";
 			if(data.length>0)
 			{
 				for(var i=data.length-1;i>=0;i--)
@@ -268,36 +284,24 @@ function getlatestdata()
 
 		}
 		
-		// clearTimeout(time);
-		// time=setTimeout(getlatestdata,2000);
+		clearTimeout(time);
+		time=setTimeout(getlatestdata,2000);
 		
 
 	}
 	xhr.send();
-	load_subscriber_info();
+	
 }
 function compose(){
             open("/compose","", "height=600,width=600,scrollbars=yes");
         }
-
+document.body.onload=function(){
+	load_subscriber_info();
+	getlatestdata();
+}
 
 </script>
 
 
-<body onload="getlatestdata()">
-	<div id="blogger_display">
-		<form  id="subscribe-form">
-			
-		</form>
-	</div>
-	<div>
-        <button onclick="compose(this)" style="margin-top:100px" >Compose New Mail</button>
-    </div>
-    <div id="rmail_disp" class="rmail">
-    </div>
 
-    
-
-
-</body>
 </html>
