@@ -127,7 +127,7 @@ document.getElementById("editor-text").appendChild(body.documentElement);
     data=new Object();
     data["subject"]=subject;
     data["send_email"]=localStorage.getItem("email");
-    data["recv_email"]=to;
+    //data["recv_email"]=to;
     data["body"]=editor_body;
     xhr.send(JSON.stringify(data));
     xhr.onload=function()

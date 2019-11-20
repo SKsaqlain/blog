@@ -13,9 +13,6 @@ import re
 import string
 import math
 import json
-import pickle
-from sklearn import feature_extraction, model_selection, naive_bayes, metrics, svm
-from spam_filter2 import SpamDetector,predict
 import time
 import threading
 
@@ -26,7 +23,7 @@ CORS(app)
 app.secret_key = "secret key"
 app.config['UPLOAD_FOLDER'] ='./static'
 
-db=pymysql.connect('127.0.0.1','root','',"mailIt")
+db=pymysql.connect('127.0.0.1','root','',"blog")
 # cursor=db.cursor()
 
 ALLOWED_EXTENSIONS = set(['txt', 'pdf', 'png', 'jpg', 'jpeg', 'gif'])
@@ -34,10 +31,12 @@ cursor=db.cursor()
 cursor.execute('set global max_allowed_packet=67108864')
 cursor.close()
 db.close()
-email_column=["id","send_email","recv_email","subject","body","date","spam","star","send_eread","recv_eread"]
-reply_column=["id","mid","send_email","recv_email","body","date"]
-spam_check_log_column=["id"]
-user_column=["email","username","password"]
+
+blog_column=["id","send_email","subject","body","date","likes","dislikes","category_id"]
+blogger_column=["id","email"]
+comment_column=["id","bid","send_email","recv_email","body","date"]
+subscribe_colummn=["rev_email","blogger_email"]
+user_column=["email","username","password","phonenumber","blockstate"]
 
 @app.route("/")
 def redirect_login():
@@ -59,7 +58,7 @@ def compose():
 #200-success #400-login failed.
 @app.route("/login",methods=['POST'])
 def login():
-	db=pymysql.connect('127.0.0.1','root','',"mailIt")
+	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
 	email=request.form['email']
 	password=request.form['password']
@@ -87,7 +86,7 @@ def signup():
 		password=request.form["password"]
 		email=request.form["email"]
 		print(username,password,email)
-		db=pymysql.connect('127.0.0.1','root','',"mailIt")
+		db=pymysql.connect('127.0.0.1','root','',"blog")
 		cursor=db.cursor()
 		sql="insert into user values('%s','%s','%s')"%(email,username,password)
 		if(cursor.execute(sql)>0):
@@ -103,7 +102,7 @@ def signup():
 	elif(request.method=="GET"):
 		#checking if the email already exists or not.
 		email=request.args["email"]
-		db=pymysql.connect('127.0.0.1','root','',"mailIt")
+		db=pymysql.connect('127.0.0.1','root','',"blog")
 		cursor=db.cursor()
 		sql="select * from user where email='%s'"%(email)
 		resp=""
@@ -129,7 +128,7 @@ def signup():
 def getData(email):
 	print(email)
 	#query to extract all the emails received
-	db=pymysql.connect('127.0.0.1','root','',"mailIt")
+	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
 	sql="select id,send_email,recv_email,subject,body,date,spam,star from email where recv_email='%s' or send_email='%s' order by date desc"%(str(email),str(email))
 	cursor.execute(sql)
@@ -157,14 +156,63 @@ def getData(email):
 def rediret_display_mail():
 	return render_template("display_mail.html")
 
+#get all blogger
+@app.route("/get_bloggers",methods=["GET"])
+def get_blogger():
+	db=pymysql.connect('127.0.0.1','root','',"blog")
+	cursor=db.cursor()
+	sql="select * from blogger"
+	if(cursor.execute(sql)):
+		rows=cursor.fetchall()
+	else:
+		rows=[]
+	
+	if(len(rows)>0):
+		message=[]
+		for blogger in  rows:
+			message.append(dict(zip(blog_column,blogger)))
+		resp=jsonify(message)
+		resp.status_code=200
+		
+	else:
+		resp=jsonify()
+		resp.status_code=400
+	cursor.close()
+	db.close()
+	return resp
+
+@app.route("/subscribeTOBlog/<email>",methods=["POST"])
+def subscribeToBlog(email):
+	print(email)
+	blogger_email=request.form["bloggers"]
+	print(blogger_email)
+	db=pymysql.connect('127.0.0.1','root','',"blog")
+	cursor=db.cursor()
+	sql="select * from subscribe where recv_email='%s' and blogger_email='%s'"%(email,blogger_email)
+	resp=" "
+	if(cursor.execute(sql)):
+		resp=jsonify()
+		resp.status_code=400
+	else:
+		sql="insert into subscribe values('%s','%s')"%(email,blogger_email)
+		cursor.execute(sql)
+		db.commit()
+		resp=jsonify(message)
+		resp.status_code=200
+		
+	cursor.close()
+	db.close()
+	return resp
+
+
 #get a specific mail used to display mail in a new window.
 @app.route("/display_mail/<mid>",methods=["GET"])
 def display_mail(mid):
 	print(mid)
 	#query to extract all the emails received
-	db=pymysql.connect('127.0.0.1','root','',"mailIt")
+	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
-	sql="select * from email where id='%s'"%(mid)
+	sql="select * from blog where id='%s'"%(mid)
 	if(cursor.execute(sql)):
 		rows=cursor.fetchall()
 	else:
@@ -173,7 +221,7 @@ def display_mail(mid):
 	if(len(rows)>0):
 		message=[]
 		for each_mail in  rows:
-			message.append(dict(zip(email_column,each_mail)))
+			message.append(dict(zip(blog_column,each_mail)))
 		resp=jsonify(message)
 		resp.status_code=200
 		
@@ -192,18 +240,17 @@ def getLatestData(email):
 	if("previous_mails" not in session):
 		session["previous_mails"]=list()
 		session.modified=True
-	db=pymysql.connect('127.0.0.1','root','',"mailIt")
+	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
 	for _ in range(3):
 		
-		sql='''(select * from email where recv_email='%s' or send_email='%s' order by date desc)
-				UNION (select * from  email where recv_email='%s' and recv_eread=0 order by date desc)
-				UNION (select * from email where send_email='%s' and send_eread=0 order by date desc)'''%(email,email,email,email)
+		sql='''select * from blog where send_email in 
+			(select blogger_email from  subscirbe where recv_email='%s')'''%(email)
 		print(cursor.execute(sql))
 		data=cursor.fetchall()
 		message=[]
 		for each_mail in data:
-			message.append(dict(zip(email_column,each_mail)))
+			message.append(dict(zip(blog_column,each_mail)))
 		data=message
 		message_to_be_sent=[]
 		for ele in data:
@@ -226,8 +273,59 @@ def getLatestData(email):
 	return resp
 
 
+@app.route("/like/<bid>",methods=["GET"])
+def like(bid):
+	print(bid)
+	db=pymysql.connect('127.0.0.1','root','',"blog")
+	cursor=db.cursor()
+	sql="select like from blog where id=%d"%(int(mid))
+	cursor.execute(sql);
+	likes=int(cursor.fetchone()[0])
+	print(likes)
+	sql="update table like set likes=%d where id='%s'"%(likes+1,bid)
 
+	if(cursor.execute(sql)>0):
+		print("like incremented")
+		db.commit()
+		resp=jsonify({})
+		resp.status_code=200
+		cursor.close()
+		db.close()
+		return resp
+	else:
+		db.commit()
+		resp=jsonify({})
+		resp.status_code=400
+		cursor.close()
+		db.close()
+		return resp
 
+@app.route("/dislike/<bid>",methods=["GET"])
+def like(bid):
+	print(bid)
+	db=pymysql.connect('127.0.0.1','root','',"blog")
+	cursor=db.cursor()
+	sql="select dislike from blog where id=%d"%(int(mid))
+	cursor.execute(sql);
+	dislikes=int(cursor.fetchone()[0])
+	print(dislikes)
+	sql="update table like set dislikes=%d where id='%s'"%(dislikes+1,bid)
+
+	if(cursor.execute(sql)>0):
+		print("dislike incremented")
+		db.commit()
+		resp=jsonify({})
+		resp.status_code=200
+		cursor.close()
+		db.close()
+		return resp
+	else:
+		db.commit()
+		resp=jsonify({})
+		resp.status_code=400
+		cursor.close()
+		db.close()
+		return resp
 	
 
 
@@ -239,42 +337,26 @@ def add__get_reply():
 		print(request.form)
 		# genereating id
 		id_=0
-		db=pymysql.connect('127.0.0.1','root','',"mailIt")
+		db=pymysql.connect('127.0.0.1','root','',"blog")
 		cursor=db.cursor()
-		sql="select max(id) from reply"
+		sql="select max(id) from comment"
 		try:
 			if(cursor.execute(sql)>0):
 				id_=int(cursor.fetchone()[0])+1
 		except:
 			pass
-		sql='''insert into reply(id,mid,send_email,recv_email,body) 
-				values('%s','%s','%s','%s','%s')'''%(id_,request.form["mid"],request.form["send_email"],request.form["recv_email"],request.form["body"])
+		sql='''insert into comment(id,bid,send_email,body) 
+				values('%s','%s','%s','%s')'''%(id_,request.form["mid"],request.form["send_email"],request.form["body"])
 		if(cursor.execute(sql)>0):
 			print("reply sent")
 		db.commit()
-
-		#updating the main thread email_read column
-		sql="select send_email,recv_email from email where id=%s"%(request.form["mid"])
-		if(cursor.execute(sql)>0):
-
-			data=cursor.fetchall()[0]
-			message=dict(zip(["send_email","recv_email"],data))
-			data=message
-			mid=request.form["mid"]
-			if(data["send_email"]==request.form["recv_email"]):
-				sql="update email set send_eread=0 where id=%s"%(mid)
-			else:
-				sql="update email set recv_eread=0 where id=%s"%(mid)
-			if(cursor.execute(sql)>0):
-				print("made changes to read column in email table")
-				db.commit()
 		resp=jsonify({})
 		resp.status_code=200
 		cursor.close()
 		db.close()
 		return resp
 	elif(request.method=="GET"):
-		db=pymysql.connect('127.0.0.1','root','',"mailIt")
+		db=pymysql.connect('127.0.0.1','root','',"blog")
 		cursor=db.cursor()
 		mid=int(request.args["mid"])
 		reply_id=request.args["id"]
@@ -282,26 +364,18 @@ def add__get_reply():
 			sql=" "
 			if(reply_id=="null"):
 				print("here1")
-				sql="select * from reply where mid=%d order by date"%(mid)
+				sql="select * from comment where bid=%d order by date"%(mid)
 			else:
 				print("herer2")
-				sql="select * from reply where mid=%d and id>%d order by date"%(mid,int(reply_id))
+				sql="select * from comment where bid=%d and id>%d order by date"%(mid,int(reply_id))
 			
 			if(cursor.execute(sql)>0):
 
 				data=cursor.fetchall()
 				message=[]
 				for each_reply in  data:
-					message.append(dict(zip(reply_column,each_reply)))
+					message.append(dict(zip(comment_column,each_reply)))
 				resp=jsonify(message)
-				#set the read column of the  email table
-				sql="update email set send_eread=1 and recv_eread=1 where id=%d"%(mid)
-				if(cursor.execute(sql)>0):
-					print("read column modified")
-					
-				else:
-					print("unable to modify read column")
-				db.commit()
 				resp.status_code=200
 				cursor.close()
 				db.close()
@@ -328,30 +402,30 @@ def add__get_reply():
 #send email
 @app.route("/compose_send",methods=["POST"])
 def compose_send():
-	db=pymysql.connect('127.0.0.1','root','',"mailIt")
+	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
 	req_data=request.get_json()
 	#print(req_data)
 	# genereating id 
+	
+	#making the user a blogger
+	sql="select * from  blogger where email='%s'"%(req_data["send_email"])
+	if(cursor.execute(sql)==0):
+		sql="insert into blogger(email) values('%s')"%(req_data["send_email"])
+		cursor.execute(sql)
+		db.commit()
 	id_=0
-	sql="select max(id) from email"
+	sql="select max(id) from blog"
 	try:
 		if(cursor.execute(sql)>0):
 			id_=int(cursor.fetchone()[0])+1
 	except:
 		pass
-	sql="insert into email(id,send_email,recv_email,subject,body) values(%s,'%s','%s','%s','%s')"%(id_,req_data["send_email"],req_data["recv_email"],req_data["subject"],req_data["body"])
+	sql="insert into blog(id,send_email,subject,body) values(%s,'%s','%s','%s')"%(id_,req_data["send_email"],req_data["subject"],req_data["body"])
 	if(cursor.execute(sql)>0):
-		print("email sent")
+		print("blog sent")
 	db.commit()
-	cursor.close()
-	time.sleep(1)
-	cursor=db.cursor()
-	#inserting data into spam_log database  to be check for later
-	sql="insert into spam_check_log(id) values(%s)"%(id_)
-	if(cursor.execute(sql)>0):
-		print("emailed logged for further check")
-	db.commit()
+	
 	resp=jsonify({})
 	resp.status_code=200
 	cursor.close()
@@ -361,7 +435,7 @@ def compose_send():
 @app.route("/delete_mail/<mid>",methods=["DELETE"])
 def delete_mail(mid):
 	print("in delete mail method")
-	db=pymysql.connect('127.0.0.1','root','',"mailIt")
+	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
 	mail_id=mid
 	print("deleting"+mail_id)
@@ -395,7 +469,7 @@ def delete_mail(mid):
 @app.route("/star/<mid>",methods=["GET"])
 def star(mid):
 	print(mid)
-	db=pymysql.connect('127.0.0.1','root','',"mailIt")
+	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
 	sql='''update email set star=	CASE  
 									when star=1 then 0
@@ -419,7 +493,7 @@ def star(mid):
 #function to set spam 
 @app.route("/spam/<mid>",methods=["GET"])
 def spam(mid):
-	db=pymysql.connect('127.0.0.1','root','',"mailIt")
+	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
 	print(mid)
 	sql='''update email set spam=	CASE  
@@ -448,7 +522,7 @@ def email_read(mid,email):
 
 	if(request.method=="GET"):
 		#chekc who has sent the mail to whome
-		db=pymysql.connect('127.0.0.1','root','',"mailIt")
+		db=pymysql.connect('127.0.0.1','root','',"blog")
 		cursor=db.cursor()
 		sql="select * from email where id=%s"%(int(mid));
 		if(cursor.execute(sql)>0):
@@ -473,7 +547,7 @@ def email_read(mid,email):
 			return resp
 	elif(request.method=="POST"):
 		#the receivers email/ whoever is viewing the mail has to be methioned in the route 
-		db=pymysql.connect('127.0.0.1','root','',"mailIt")
+		db=pymysql.connect('127.0.0.1','root','',"blog")
 		cursor=db.cursor()
 		sql="select * from email where id=%d"%(int(mid));
 		
@@ -549,7 +623,7 @@ def upload_file():
 
 def spam_check():
 	for _ in range(10):
-		db=pymysql.connect('127.0.0.1','root','',"mailIt")
+		db=pymysql.connect('127.0.0.1','root','',"blog")
 		cursor=db.cursor()
 		print("Spam check active")
 		sql="select * from spam_check_log"

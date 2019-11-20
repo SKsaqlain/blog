@@ -97,12 +97,6 @@ td{
 							tr.appendChild(td);
 							main_thread.appendChild(tr);
 
-							tr=createTR();
-							td=createTD("To");
-							tr.appendChild(td);
-							td=createTD(data["recv_email"]);
-							tr.appendChild(td);	
-							main_thread.appendChild(tr);
 
 							tr=createTR();
 							td=createTD(data["date"]);
@@ -129,14 +123,8 @@ td{
 							//sender becomes receiver and receiver becomes sender
 
 							//send_email=data["recv_email"];
-							send_email=email;
-							if(email==data["send_email"])
-								recv_email=data["recv_email"];
-							else
-								recv_email=data["send_email"];
 							
-							console.log(send_email);
-							console.log(recv_email);
+
 						// var mail_body=document.getElementById("mail_body");
 						parser=new DOMParser();
 						body=parser.parseFromString(data["body"],'text/xml');
@@ -160,24 +148,6 @@ td{
 					xhr.send();
 
 				}
-			function mark_main_thread_read()
-			{
-				var xhr=new XMLHttpRequest();
-				//the receiver becomes sender here 
-				xhr.open("POST","/email_read/"+mid+"/"+send_email,true);
-				xhr.onload=function()
-				{
-					if(this.status==200)
-					{
-						console.log("updated db");
-					}
-					else
-					{
-						console.log("some error");
-					}
-				}
-				xhr.send();
-			}
 
 			//function  to upload comments
 			function generate_reply_form()
@@ -197,11 +167,6 @@ td{
 				se.setAttribute("value",send_email);
 				form.appendChild(se);
 
-				var re=document.createElement("input");
-				re.setAttribute("type","hidden");
-				re.setAttribute("name","recv_email");
-				re.setAttribute("value",recv_email);
-				form.appendChild(re);
 
 				var mail_id=document.createElement("input");
 				mail_id.setAttribute("type","hidden");
@@ -264,7 +229,7 @@ td{
 							table.id=data[i]["id"];
 							var tr=createTR();
 							var td=createTD(null);
-							td.innerHTML=data[i]["send_email"]+" ----> "+data[i]["recv_email"];
+							td.innerHTML=data[i]["send_email"]
 							tr.appendChild(td);
 							
 							td=createTD(data[i]["date"]);

@@ -109,7 +109,7 @@ function getlatestdata()
 							td=document.createElement("td");
                             td.width="100px";
 							td.id=mail["id"];
-							td.innerHTML=mail["send_email"]+"->"+mail["recv_email"];
+							td.innerHTML=mail["send_email"];
 							td.onclick=function ()
 							{	var url="/redirect_display_mail";
 								localStorage.setItem("mid",this.id);
@@ -123,84 +123,6 @@ function getlatestdata()
 							td.width="100px";
 							td.innerHTML=mail["subject"];
 							tr.appendChild(td);
-
-							td=document.createElement("td");
-							td.id=mail["id"]+"spam";
-							td.class="spam"+mail["id"]+" "+mail["spam"];
-							// console.log(td.class);
-							td.width="100px";
-							td.classList+="spam";
-							td.onclick=function(){
-								var xhr=new XMLHttpRequest();
-								url="/spam/"+table.id;
-								xhr.open("GET",url,true);
-								xhr.send();
-								xhr.onload=function(){
-									if(this.status==200){
-										
-										console.log("marked");
-										d=document.getElementById(mail["id"]+"spam").parentNode.parentNode.parentNode;
-										d.parentNode.removeChild(d);
-										d=document.getElementById(mail["id"]);
-
-										d.parentNode.removeChild(d);
-										
-										
-									}
-									else{
-										alert("Unable to mark");
-									}
-								}
-							}
-							if(mail["spam"]){
-								td.innerHTML="!";
-								td.style.color="red";
-							}
-							else{
-								td.innerHTML="!";
-								td.style.color="white";
-							}
-							tr.appendChild(td);
-
-
-							td=document.createElement("td");
-							td.width="100px";
-							td.classList+="star";
-							td.id=mail["id"]+"star";
-							td.onclick=function(){
-								var xhr=new XMLHttpRequest();
-								url="/star/"+table.id;
-								xhr.open("GET",url,true);
-								xhr.send();
-								xhr.onload=function(){
-									if(this.status==200){
-										
-										console.log("stared");
-										d=document.getElementById(mail["id"]+"star").parentNode.parentNode.parentNode;
-										d.parentNode.removeChild(d);
-										d=document.getElementById(mail["id"]);
-
-										d.parentNode.removeChild(d);
-									}
-									else{
-										alert("Unable to star");
-									}
-								}
-							}
-							if(mail["star"]){
-								// td.innerHTML="Starred";
-								td.innerHTML="&#9734";
-								td.style.color="yellow";
-								
-							}
-							else{
-								// td.innerHTML="Star?";
-								td.innerHTML="&#9734";
-								td.style.color="white";
-								// td.style.font=;
-								td.style.fontSize=400;
-							}
-							tr.appendChild(td);
 							
 
 							td=document.createElement("td");
@@ -212,58 +134,69 @@ function getlatestdata()
 								flag=1;
 							}
 							tr.appendChild(td);
-						table.appendChild(tr);
+
+							td=document.createElement("td");
+							td.width="200px";
+							td.innerHTML=mail["likes"];
+							td.id=mail["id"];
+							td.onclick=function()
+							{	var previous=this;
+								var xhr=new XMLHttpRequest();
+								xhr.open("GET","/like/"+this.id,true);
+								xhr.onload=function()
+								{
+									if(this.status==200)
+									{	
+										console.log("liked");
+										previous.innerHTML=parseInt(previous.innerHTML)+1;
+										previous.onclick=function(){};
+									}
+									else:
+										console.log("like failed");
+								}
+								xhr.send();
+								
+							}
+							tr.appendChild(td);
+
+
+							td=document.createElement("td");
+							td.width="200px";
+							td.innerHTML=mail["dislikes"];
+							td.id=mail["id"];
+							td.onclick=function()
+							{	var previous=this;
+								var xhr=new XMLHttpRequest();
+								xhr.open("GET","/dislike/"+this.id,true);
+								xhr.onload=function()
+								{
+									if(this.status==200)
+									{	
+										console.log("disliked");
+										previous.innerHTML=parseInt(previous.innerHTML)+1;
+										previous.onclick=function(){};
+									}
+									else:
+										console.log("dislike failed");
+								}
+								xhr.send();
+								
+							}
+							tr.appendChild(td);
+
+							table.appendChild(tr);
 
 						
-					button=document.createElement("button");
-					button.innerHTML="delete";
-					button.id=mail["id"];
-					button.onclick=function()
-					{
-						var url="/delete_mail/"+this.id;
-						var id=this.id;
-						var xhr=new XMLHttpRequest();
-						xhr.open("DELETE",url,true);
-						xhr.onload=function()
-						{	if(this.status==200)
-							{
-								console.log("deleted mail");
-								// var tables=document.getElementsByTagName("table");
-								// 			for(i=0;i<tables.length;i++)
-								// 			{
-								// 				if(tables[i].id==id)
-								// 					tables[i].parentNode.removeChild(tables[i]);
-								// 			}
-											
-								this.abort();
-								//getData();
-							}
-							else
-							{
-								console.log("failed to delete mail");
-							}
-
-						}
-						xhr.send();
-						this.parentNode.removeChild(this.previousSibling);
-						this.parentNode.removeChild(this);
-						
-						
-						
-					}
 					//checking whether table already exists  or nto
 					
 
 					var etable=document.querySelector(".table"+mail["id"]);
 					if(etable!=null)
 					{	//reoving button element
-						rmail_disp.removeChild(etable.nextSibling)
 						rmail_disp.removeChild(etable);
-
 					}
 						division.appendChild(table);
 						// rmail_disp.insertBefore(division);
-						rmail_disp.insertBefore(button,rmail_disp.childNodes[0]);
 						rmail_disp.insertBefore(division,rmail_disp.childNodes[0]);
 					
 				}
@@ -282,9 +215,65 @@ function getlatestdata()
 function compose(){
             open("/compose","", "height=600,width=600,scrollbars=yes");
         }
+function load_subscriber_info()
+{
+	var xhr=new XMLHttpRequest();
+	xhr.open("/get_bloggers","GET",true);
+	xhr.onload=function()
+	{
+		if(this.status==200)
+		{	var data=JSON.parse(this.responseText);
+			var form=document.getElementById("subscribe_blogger");
+			var select=document.createElement("select");
+			select.setAttribute("id","bloggers");
+			select.setAttribute("name","blogger");
+			select.setAttribute("required","required");
 
+			for(var i=0;i<data.length;i++)
+			{
+				var option=document.createElement("option");
+				option.setAttribute("value",data[i]["email"]);
+				option.innerHTML=data[i]["email"];
+				select.appendChild(option);
+			}
+			form.appendChild(select);
+
+		}
+		else
+		{
+			console.log("some error occured");
+		}
+	}
+	xhr.send();
+}
+fucntion subscribeToBlog()
+{	var email=localStorage.getItem("email");
+	var form=document.getElementById("subscribe_blogger");
+	var fm=new FormData(form);
+	var xhr=new XMLHttpRequest();
+	xhr.open("POST","/subscribeToBlog/"+email,true);
+	xhr.onload=function()
+	{
+		if(this.status==200)
+		{
+			console.log("subscribed");
+		}
+		else
+		{
+			console.log("some error");
+		}
+	}
+	xhr.send(fm);
+
+}
+load_subscriber_info();
 </script>
 <body onload="getlatestdata()">
+	<div id="blogger_display">
+		<form method="POST" action="/subscribe" id="subscribe_blogger">
+			<button onclik="subscribeTobBlog()">Submit</button>
+		</form>
+	</div>
 	<div>
         <button onclick="compose(this)" style="margin-top:100px" >Compose New Mail</button>
     </div>
