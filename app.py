@@ -195,7 +195,7 @@ def subscribeToBlog(email,blogger):
 		resp=jsonify()
 		resp.status_code=400
 	else:
-		sql="insert into subscribe values('%s','%s')"%(email,blogger_email)
+		sql="insert into subscribe(recv_eamil,blogger_email) values('%s','%s')"%(email,blogger_email)
 		cursor.execute(sql)
 		db.commit()
 		resp=jsonify(message)

@@ -86,7 +86,7 @@ function load_subscriber_info()
 		if(this.status==200)
 		{	var data=JSON.parse(this.responseText);
 			console.log(data);
-			var form=document.getElementById("subscribe_blogger");
+			var form=document.getElementById("subscribe-form");
 			var select=document.createElement("select");
 			select.setAttribute("id","bloggers");
 			select.setAttribute("name","blogger");
@@ -113,7 +113,7 @@ function load_subscriber_info()
 
 function subscribeToBlog()
 {	var email=localStorage.getItem("email");
-	var form=document.getElementById("subscribe_blogger");
+	var form=document.getElementById("subscribe-form");
 	var blogger=form["blogger"].value;
 	console.log("subscribeToBlog:"+blogger);
 	
@@ -280,8 +280,8 @@ function compose(){
 
 <body onload="getlatestdata()">
 	<div id="blogger_display">
-		<form  id="subscribe_blogger">
-			<button onclick="subscribeToBlog()">Submit</button>
+		<form  id="subscribe-form">
+			<button onclick="subscribeToBlog()">Subscribe</button>
 		</form>
 	</div>
 	<div>
