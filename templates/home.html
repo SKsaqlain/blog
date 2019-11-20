@@ -67,22 +67,22 @@ table{
 </style>
 
 </head>
+
 <script type="text/javascript">
-	//latest mail id
-	lmid=null;
-	time=null;
-	//variable used to record the lateset time
-	flag=0
-	email=localStorage.getItem("email");
-	
+//latest mail id
+lmid=null;
+time=null;
+//variable used to record the lateset time
+flag=0
+email=localStorage.getItem("email");
+
 	
 function getlatestdata()
 {
 	var xhr=new XMLHttpRequest();
 	xhr.open("GET","/getData/"+email+"/latest",true);
 
-	xhr.onload=
-	function()
+	xhr.onload=function()
 	{
 		if(this.status==200)
 		{
@@ -151,7 +151,7 @@ function getlatestdata()
 										previous.innerHTML=parseInt(previous.innerHTML)+1;
 										previous.onclick=function(){};
 									}
-									else:
+									else
 										console.log("like failed");
 								}
 								xhr.send();
@@ -176,7 +176,7 @@ function getlatestdata()
 										previous.innerHTML=parseInt(previous.innerHTML)+1;
 										previous.onclick=function(){};
 									}
-									else:
+									else
 										console.log("dislike failed");
 								}
 								xhr.send();
@@ -205,12 +205,13 @@ function getlatestdata()
 
 		}
 		
-		clearTimeout(time);
-		time=setTimeout(getlatestdata,2000);
+		// clearTimeout(time);
+		// time=setTimeout(getlatestdata,2000);
 		
 
 	}
 	xhr.send();
+	load_subscriber_info();
 }
 function compose(){
             open("/compose","", "height=600,width=600,scrollbars=yes");
@@ -246,7 +247,7 @@ function load_subscriber_info()
 	}
 	xhr.send();
 }
-fucntion subscribeToBlog()
+function subscribeToBlog()
 {	var email=localStorage.getItem("email");
 	var form=document.getElementById("subscribe_blogger");
 	var fm=new FormData(form);
@@ -266,8 +267,9 @@ fucntion subscribeToBlog()
 	xhr.send(fm);
 
 }
-load_subscriber_info();
 </script>
+
+
 <body onload="getlatestdata()">
 	<div id="blogger_display">
 		<form method="POST" action="/subscribe" id="subscribe_blogger">

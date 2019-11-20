@@ -245,7 +245,7 @@ def getLatestData(email):
 	for _ in range(3):
 		
 		sql='''select * from blog where send_email in 
-			(select blogger_email from  subscirbe where recv_email='%s')'''%(email)
+			(select blogger_email from subscribe where recv_email='%s')'''%(email)
 		print(cursor.execute(sql))
 		data=cursor.fetchall()
 		message=[]
