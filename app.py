@@ -88,7 +88,7 @@ def signup():
 		print(username,password,email)
 		db=pymysql.connect('127.0.0.1','root','',"blog")
 		cursor=db.cursor()
-		sql="insert into user values('%s','%s','%s')"%(email,username,password)
+		sql="insert into user(email,username,password) values('%s','%s','%s')"%(email,username,password)
 		if(cursor.execute(sql)>0):
 			print("sign-up successful")
 		db.commit()
