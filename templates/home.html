@@ -95,9 +95,10 @@ email=localStorage.getItem("email");
 function subscribeToBlog()
 {	console.log("here");
 	var email=localStorage.getItem("email");
+	console.log(email);
 	var form=document.getElementById("subscribe-form");
 	var blogger=form["blogger"].value;
-	console.log("subscribeToBlog:"+blogger);
+	console.log(blogger);
 	
 	var xhr=new XMLHttpRequest();
 	xhr.open("POST","/subscribeToBlog/"+email+"/"+blogger,true);
@@ -113,6 +114,7 @@ function subscribeToBlog()
 		}
 	}
 	xhr.send();
+	return false;
 	
 }
 
@@ -123,7 +125,7 @@ function load_subscriber_info()
 	xhr.onload=function()
 	{
 		if(this.status==200)
-		{	var data=JSON.parse(this.response);
+		{	var data=JSON.parse(this.responseText);
 			console.log(data);
 			var form=document.getElementById("subscribe-form");
 			var select=document.createElement("select");
@@ -137,11 +139,12 @@ function load_subscriber_info()
 				option.innerHTML=data[i]["email"];
 				select.appendChild(option);
 			}
-			form.appendChild(select);
+			
 			var button=document.createElement("button");
 			button.innerHTML="Subscribe";
 			button.onclick=subscribeToBlog;
 			form.appendChild(button);
+			form.appendChild(select);
 
 		}
 		else
