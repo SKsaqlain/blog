@@ -235,6 +235,33 @@ def display_mail(mid):
 	
 
 
+@app.route("/edit_blog")
+def edit_blog():
+	return render_template("edit_blog.html")
+
+@app.route("/update_blog/<bid>",methods=["POST"])
+def update_blog(bid):
+	db=pymysql.connect('127.0.0.1','root','',"blog")
+	cursor=db.cursor()
+	req_data=request.get_json()
+	
+	sql="select * from blog where id=%d"%(int(bid))
+	if(cursor.execute(sql)==0):
+		resp=jsonify()
+		resp.status_code=400
+		cursor.close()
+		db.close()
+		return resp
+	sql="update blog set subject='%s',body='%s' where id=%d"%(req_data["subject"],req_data["body"],bid)
+	if(cursor.execute(sql)>0):
+		print("blog sent")
+	db.commit()
+	
+	resp=jsonify({})
+	resp.status_code=200
+	cursor.close()
+	db.close()
+	return resp
 #use longpooling to get the latest mails.
 @app.route("/getData/<email>/latest",methods=['GET'])
 def getLatestData(email):
@@ -299,10 +326,10 @@ def like(bid,email):
 	likes=int(cursor.fetchone()[0])
 	print(likes)
 	
-	sql="update blog set likes=%d where id='%s'"%(likes+1,bid)
+	sql="update blog set likes=%d where id=%d"%(likes+1,int(bid))
 	cursor.execute(sql)
 	db.commit()
-	sql="insert into likes(email,bid) values('%s',%d)"%(email,bid);
+	sql="insert into likes(email,bid) values('%s',%d)"%(email,int(bid))
 	if(cursor.execute(sql)):
 		db.commit()
 		print("like incremented")
@@ -326,7 +353,7 @@ def dislike(bid,email):
 	print(email)
 	db=pymysql.connect('127.0.0.1','root','',"blog")
 	cursor=db.cursor()
-	sql="select * from dislikes where email='%s' and bid=%d"%(email,bid)
+	sql="select * from dislikes where email='%s' and bid=%d"%(email,int(bid))
 	if(cursor.execute(sql)):
 		resp=jsonify()
 		resp.status_code=400
@@ -337,10 +364,10 @@ def dislike(bid,email):
 	cursor.execute(sql);
 	dislikes=int(cursor.fetchone()[0])
 	print(dislikes)
-	sql="update blog set dislikes=%d where id='%s'"%(dislikes+1,bid)
+	sql="update blog set dislikes=%d where id=%d"%(dislikes+1,int(bid))
 	cursor.execute(sql)
 	db.commit()
-	sql="insert into dislikes(email,bid) values(%s,%d)"%(email,bid)
+	sql="insert into dislikes(email,bid) values('%s',%d)"%(email,int(bid))
 	if(cursor.execute(sql)>0):
 		print("dislike incremented")
 		db.commit()

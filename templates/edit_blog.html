@@ -1,9 +1,36 @@
-<!DOCTYPE html>
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-<style type="text/css">
+    <head>
+        <style>
+             body{
+                    background-image: url("/static/img/mail.png");
+                    background-size: cover;
+                }
 
+.send-button{
+	background-color: rgb(61, 170, 61);
+	border-radius : 10px;
+	border-collapse: collapse;
+	border: none;
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+	color:white;
+	padding:10px;
+	margin: 20px auto;
+	display: block;
+	cursor: pointer;
+	
+	
+} 
+.text{
+    background-color: white;
+    font-family: 'Courier New', Courier, monospace;
+    border-radius : 10px;
+	border-collapse: collapse;
+	/* border: none; */
+	padding:10px;
+	margin: 0 auto;
+	display: inline;
+	
+}
 #editor-container {
     border: 1px solid #cccccc;
     display: inline-block;
@@ -35,31 +62,106 @@
     padding: 5px;
     overflow: auto;
 }
-
+.textdivi{
+    background-color: aliceblue;
+    font-family: 'Courier New', Courier, monospace;
+}
 #editor-text img {
     max-width: 250px;
+    
 }
 
-</style>
+        </style>
+
+<script type="text/javascript">
+    bid=localStorage.getItem("bid");
+    function load_blog()
+    {
+        var xhr=new XMLHttpRequest();
+        
+        xhr.open("GET","/display_mail/"+bid,true);
+        xhr.onload=function(){
+            if(this.status==200)
+            {
+                var data=JSON.parse(this.responseText);
+                parser=new DOMParser();
+                body=parser.parseFromString(data["body"],'text/xml');
+                // mail_body.appendChild(body);
+                var subject=document.getElementById("subject");
+                subject.innerHTML=data["subject"];
+                
+                
+                var editor_text=document.getElementById("editor-text");
+                editor_text.appendChild(body.documentElement);
+            }
+        }
+        xhr.send()
+    }
+</script>
 </head>
 
-<body>
+    <body>
+            <div id="editor-container" style="margin-top:100px">
+                    <div id="editor-menu" class="textdivi">
+                        <button id="bold-button" title="Bold">Bold</button>
+                        <button id="underline-button" title="Underline">Underline</button>
+                        <button id="list-button" title="Bullet List">List</button>
+                        <button id="image-button" title="Picture">Attachments</button>
+                        <form method="post" action="/editor" enctype="multipart/form-data"  id="upload_image">
+                            <input  type="file" name="file" autocomplete="off" required>
+                        </form>
+                        <br/>
+                        <input type="text" id="subject" name="subject" placeholder="Subject" class="text">
+                    </div>
+                    <div id="editor-text" class="textdivi" contenteditable="true" spellcheck="false"></div>
+                </div>
+    <script type="text/javascript">
+        load_blog();
+    </script>
+    <button onclick="send_email(this)" class="send-button">SEND</button>
+    <br/>
+        
+    </body>
+    <script>
+ function send_email(i)
+{   //serializing data
+    x=new XMLSerializer();
+    var data=document.getElementById("editor-text");
+    // data.id="some_data";
+    editor_body=x.serializeToString(data);
+    console.log(editor_body);
 
-<div id="editor-container">
-    <div id="editor-menu">
-        <button id="bold-button" title="Bold">Bold</button>
-        <button id="underline-button" title="Underline">Underline</button>
-        <button id="list-button" title="Bullet List">List</button>
-        <button id="image-button" title="Picture">Attachments</button>
-        <form method="post" action="/editor" enctype="multipart/form-data"  id="upload_image">
-            <input  type="file" name="file" autocomplete="off" required>
-        </form>
-    </div>
-    <div id="editor-text" contenteditable="true" spellcheck="false"></div>
-</div>
+    subject=document.getElementById("subject").value;
+    // console.log(subject)
+    xhr=new XMLHttpRequest();
+    xhr.open("POST","/update_blog/"+bid,true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    
+    data=new Object();
+    //data["subject"]=subject;
+    data["send_email"]=localStorage.getItem("email");
+    //data["recv_email"]=to;
+    data["body"]=editor_body;
+    xhr.send(JSON.stringify(data));
+    xhr.onload=function()
+    {
+        if(this.status==200)
+        {
+            alert("mail send");
+            window.close();
+        }
+        else
+        {
+            alert("failed to send mail");
+        }
+    }
+    //de-serializing data
+    // parser=new DOMParser();
+    // body=parser.parseFromString(body,'text/xml');
+    // console.log(document.getElementById("editor-text").appendChild(body.documentElement));
 
-<script>
 
+}
 // Bold menu
 document.querySelector('#bold-button').addEventListener('click', function() {
     document.execCommand('bold');
@@ -84,37 +186,52 @@ document.querySelector('#image-button').addEventListener('click',function()
     // var file = form.files[0];
     // formData.append('file', file);
     var xhr = new XMLHttpRequest();
-    xhr.responseType="JSON"
+    xhr.responseType="JSON";
     xhr.onload=function(e){
-            var file_path=JSON.parse(xhr.response);
+    	if(xhr.status==200)
+        {    var file_path=JSON.parse(xhr.response);
             if(file_path[0].indexOf('png')!=-1 || file_path[0].indexOf('jpg')!=-1 || file_path[0].indexOf('jpeg')!=-1)
-            {
+            {	a=document.createElement("a");
+        		a.href=file_path;
+                f_name=file_path[0].split("/");
+                f_name=f_name[f_name.length-1].split("\/")[1];
+                a.download=f_name;
+                editor_area.appendChild(a);
                 img_element=document.createElement("img");
-                img_element.src=file_path
+                img_element.src=file_path;
                 img_element.style.width="100px";
                 img_element.style.height="100px";
-                editor_area.appendChild(img_element);
+
+                a.appendChild(img_element);
+                
             }
             else
             {
                 a=document.createElement("a");
                 a.href=file_path;
-                f_name=file_path[0].split("/")
-                f_name=f_name[f_name.length-1]
-                a.innerHTML=f_name
+                a.download="111111111";
+                f_name=file_path[0].split("/");
+                f_name=f_name[f_name.length-1];
+                a.innerHTML=f_name;
                 editor_area.appendChild(a);
             }
+         }
+         else
+         {
+         	alert("please select a file");
+         }
     }
     // Add any event handlers here...
     xhr.open('POST', form.getAttribute('action'), true);
     xhr.send(formData);
+    form.reset();
     //return false; // To avoid actual submission of the form
 
  });
 
 // Check menu options to be highlighted on keyup and click event 
 document.querySelector('#editor-text').addEventListener('keyup', FindCurrentTags);
-document.querySelector('#editor-text').addEventListener('click', FindCurrentTags);
+document.querySelector('#editor-text').addEventListener('click', FindCurrentTags,false);
 
 function FindCurrentTags() {
     // Editor container 
@@ -202,34 +319,7 @@ function FindCurrentTags() {
     else
         document.querySelector("#list-button").classList.remove("highight-menu");
 }
-function convert_range(i)
-{   //serializing data
-    x=new XMLSerializer();
-    var data=document.getElementById("editor-text");
-    body=x.serializeToString(data);
-    console.log(body);
-    
-    //de-serializing data
-    parser=new DOMParser();
-    body=parser.parseFromString(body,'text/xml');
-    console.log(document.getElementById("editor-text").appendChild(body.documentElement));
-
-}
-</script>
 
 
-<!-- #converting DOM to xmlSTRING    SERIALIZE
-
-x=new XMLSerializer();
-var data=document.getElementById("editor-text");
-body=x.serializeToString(data);
-
-#DESERIALIZE
-parser=new DOMParser();
-body=parser.parseFromString(body,'text/xml');
-document.getElementById("editor-text").appendChild(body.documentElement);
- 
- -->
-</body>
-    <button onclick="convert_range(this)">JSONIGY</button>
+    </script>
 </html>

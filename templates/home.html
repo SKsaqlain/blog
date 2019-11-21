@@ -263,9 +263,25 @@ function getlatestdata()
 							}
 							tr.appendChild(td);
 
-							table.appendChild(tr);
+							
+							if(email==mail["send_email"])
+							{
+								var button=document.createElement("button");
+								button.id=mail["id"];
+								button.innerHTML="EDIT";
+								button.onclick=function(){
+									localStorage.setItem("bid",this.id);
+									window.location.assign("/edit_blog");
+								}
+								
+								td=document.createElement("td");
+								td.width="200px";
+								td.appendChild(button);
+								tr.appendChild(button);
 
-						
+							}
+
+						table.appendChild(tr);
 					//checking whether table already exists  or nto
 					
 
