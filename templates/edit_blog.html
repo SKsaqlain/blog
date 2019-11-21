@@ -71,8 +71,9 @@
     
 }
 
-        </style>
+</style>
 
+</head>
 <script type="text/javascript">
     bid=localStorage.getItem("bid");
     function load_blog()
@@ -80,25 +81,27 @@
         var xhr=new XMLHttpRequest();
         
         xhr.open("GET","/display_mail/"+bid,true);
+
         xhr.onload=function(){
             if(this.status==200)
             {
-                var data=JSON.parse(this.responseText);
-                parser=new DOMParser();
-                body=parser.parseFromString(data["body"],'text/xml');
+                var data=JSON.parse(this.responseText)[0];
+                var parser=new DOMParser();
+                console.log(data["body"]);
+                var body=parser.parseFromString(data["body"],'text/xml');
+                console.log(body.documentElement);
                 // mail_body.appendChild(body);
                 var subject=document.getElementById("subject");
-                subject.innerHTML=data["subject"];
-                
-                
+                subject.value=data["subject"];
+
                 var editor_text=document.getElementById("editor-text");
-                editor_text.appendChild(body.documentElement);
+                editor_text.parentNode.replaceChild(body.documentElement,editor_text);
             }
         }
         xhr.send()
     }
 </script>
-</head>
+
 
     <body>
             <div id="editor-container" style="margin-top:100px">
@@ -138,7 +141,7 @@
     xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
     
     data=new Object();
-    //data["subject"]=subject;
+    data["subject"]=subject;
     data["send_email"]=localStorage.getItem("email");
     //data["recv_email"]=to;
     data["body"]=editor_body;

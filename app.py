@@ -252,7 +252,7 @@ def update_blog(bid):
 		cursor.close()
 		db.close()
 		return resp
-	sql="update blog set subject='%s',body='%s' where id=%d"%(req_data["subject"],req_data["body"],bid)
+	sql="update blog set subject='%s',body='%s' where id=%d"%(req_data["subject"],req_data["body"],int(bid))
 	if(cursor.execute(sql)>0):
 		print("blog sent")
 	db.commit()
@@ -299,7 +299,7 @@ def getLatestData(email):
 			cursor.close()
 			db.close()
 			return resp
-		time.sleep(2)
+		time.sleep(3)
 	resp=jsonify()
 	resp.status_code=400
 	cursor.close()

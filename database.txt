@@ -8,7 +8,7 @@ create table category(id INT PRIMARY KEY,category VARCHAR(50));
 
 
 
-create table blog(id INT AUTO_INCREMENT PRIMARY KEY,blogger_id int,send_email VARCHAR(20) NOT NULL,subject VARCHAR(10),body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,likes INT DEFAULT 0,dislikes INT DEFAULT 0S,category_id INT); 
+create table blog(id INT AUTO_INCREMENT PRIMARY KEY,blogger_id int,send_email VARCHAR(20) NOT NULL,subject VARCHAR(10),body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,likes INT DEFAULT 0,dislikes INT DEFAULT 0,category_id INT); 
 
 
 create table comment(id INT AUTO_INCREMENT PRIMARY KEY,bid INT,send_email VARCHAR(20) NOT NULL, recv_email VARCHAR(20) NOT NULL,body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY(bid) REFERENCES blog(id) on DELETE CASCADE); 
