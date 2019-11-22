@@ -1,0 +1,104 @@
+<?php
+
+?>
+<!DOCTYPE html>
+<html>
+<head>
+	<title>createAccount</title>
+	<style>
+			body{
+				background-image: url("/static/img/mail.png");
+				background-size: cover;
+			}
+			.signup-div{
+				background-color:rgb(24, 211, 218);
+				
+				width:350px;
+				height:350px;
+				border-radius: 25px;
+				padding: 25px;
+				margin-left: 5%;
+				margin-top:10%;
+			}
+			.text{
+				font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+				width: 200px;
+				padding:10px;
+				margin: 20px auto;
+				display: block;
+			
+				border: none;
+				border-radius: 10px;
+			}
+	
+			.signbutton{
+				background-color: rgb(61, 170, 61);
+				border-radius : 10px;
+				border-collapse: collapse;
+				border: none;
+				font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+				color:white;
+				padding:10px;
+				margin: 0px auto;
+				display: block;
+			
+				
+				
+			}
+		</style>
+</head>
+<script type="text/javascript">
+	// var addr="<?php echo $_SERVER['SERVER_ADDR'];?>";
+	// console.log(addr);
+	function check_email(){
+
+		var email=document.getElementById("email").value.toLowerCase();
+		splitted_email=email.split("@");
+		if(splitted_email[1]!="mailit.com")
+		{	//css
+			alert("wrong domain");
+		}
+		else
+		{
+			var xhr=new XMLHttpRequest();
+			var url="/signup?email="+email;
+			
+			xhr.open('GET',url,true);
+			//storing the state information of the user.
+			localStorage.setItem("email",document.getElementById("email").value);
+			xhr.onreadystatechange = function() {
+			    if(xhr.readyState == 4){
+					if(xhr.status == 200) {
+						console.log("unique-email")
+						localStorage.setItem("email",email);
+			    	}
+			    	else if(xhr.status==400)
+			    	{	//css
+			    		alert("email already exists");
+			    	}
+			    	else
+			    	{	//css
+			    		console.log("some error");
+			    	}
+				}
+			}
+			xhr.send();
+		}
+	}
+
+		//console.log("sent");
+	
+</script>
+<body>
+	<div class="signup-div">
+	<form method="post" id="form" action="/signup">
+		<input type="name" name="username" id="username" required class="text" placeholder="Username"><br/>
+		<input type="email" name="email" id="email" onblur="check_email()" required class="text" placeholder="Email"><br/>
+		<input type="password" name="password" id="password" required class="text" placeholder="Password"><br/>
+		<input type="text" name="phonenumber" id="phonenumber"  required class="text" placeholder="phonenumber" max-size="10"><br/>
+		<input type="submit" value="Signup!" class="signbutton"><br/>
+		
+	</form>
+</div>
+</body>
+</html> 

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>logIn</title>
+	<style>
+		body{
+			background-image: url("/static/img/mail.png");
+			background-size: cover;
+		}
+		.login-div{
+			background-color:rgb(24, 211, 218);
+			
+			width:300px;
+			height:300px;
+			border-radius: 25px;
+			padding: 25px;
+			margin-left: 5%;
+			margin-top:10%;
+		}
+		.text{
+			font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+			width: 200px;
+			padding:10px;
+			margin: 20px auto;
+			display: block;
+		
+			border: none;
+			border-radius: 10px;
+		}
+
+		.loginbutton{
+			background-color: rgb(61, 170, 61);
+			border-radius : 10px;
+			border-collapse: collapse;
+			border: none;
+			font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+			color:white;
+			padding:10px;
+			margin: 20px auto;
+			display: block;
+		
+			
+			
+		}
+	</style>
+</head>
+<script type="text/javascript">
+	// addr="<?php echo $_SERVER['SERVER_ADDR'];?>";
+	// if(addr=="::1")
+	// 	addr="localhost";
+	// localStorage.setItem("addr",addr);
+	// console.log(addr);
+	function check_domain()
+	{	email=document.getElementById("email").value.toLowerCase();
+		splitted_email=email.split("@");
+		//console.log(splitted_email[1]);
+		if(splitted_email[1]!="mailit.com")
+		{	//css
+			alert("wrong domain");
+			return false;
+		}
+		return true;
+	}
+	function send_form(){
+		if(check_domain())
+		{ 	
+			var email=document.getElementById("email").value.toLowerCase();
+			var password=document.getElementById("password").value;
+			var xhr=new XMLHttpRequest();
+
+			var url="/login";
+			;
+			// console.log(document.getElementById("email").value);
+			// console.log(document.getElementById("password").value)
+			var params="email="+email+"&password="+password;
+			
+			xhr.open('POST',url,true);
+			console.log("here")
+			xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+			//storing the state information of the user.
+
+			localStorage.setItem("email",email);
+			xhr.onreadystatechange = function() {
+			    if(this.readyState == 4){
+					if(this.status == 200) {
+
+			        	window.location.assign("/home");
+			        	// document.writeln("success");
+			    	}
+			    	else if(this.status==400)
+			    	{	
+			    		alert("incorrect email or password");
+			    	}
+			     	else
+			    	{
+			    		console.log("some error");
+			    	}
+				}
+			}
+			
+			xhr.send(params);
+			console.log("sent");
+		}	
+	}
+</script>
+<body>
+	<div class="login-div">
+		<form>
+			<input type="email" name="email" id="email" onblur="check_domain()" required class="text" placeholder="Email" max-size="20"><br/>
+			<input type="password" name="password" id="password" required class="text" placeholder="Password" size="20"><br/>
+			<input type="button" value="Login!" onclick="send_form()" class="loginbutton"><br/>
+			<p style="font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;text-align: center"><span style="margin: 0px auto;display: block;">New User?&nbsp;&nbsp;<a href="/create_account">Create Account</a></span> </p>
+	</form>
+	</div>
+</body>
+
+</html> 

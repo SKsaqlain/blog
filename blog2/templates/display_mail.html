@@ -1,0 +1,266 @@
+<html>
+<head>
+		<title>
+			DISPLAY BLOG
+		</title>
+		<style>
+			body{
+                    background-image: url("/static/img/mail.png");
+                    background-size: cover;
+                }
+
+.reply-button{
+	background-color: rgb(61, 170, 61);
+	border-radius : 10px;
+	border-collapse: collapse;
+	border: none;
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+	color:white;
+	padding:10px;
+	/* margin: 20px auto; */
+	/* display: block; */
+	cursor: pointer;
+	
+	
+} 
+.text{
+    background-color: white;
+    font-family: 'Courier New', Courier, monospace;
+    border-radius : 10px;
+	border-collapse: collapse;
+	/* border: none; */
+	padding:10px;
+	margin: 0 auto;
+	display: inline;
+	
+}
+
+.textdivi{
+    background-color: aliceblue;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+table{
+	padding: 10px;
+	font: Arial 14;
+	background-color:aliceblue;
+	border-radius: 10px;
+	/* display: block; */
+	margin: 50px;
+	text-align: center;
+}
+td{
+	border-bottom:1px brown;
+}
+		</style>
+	</head>
+	<body onload="load_main_thread()">
+		<table id="main_thread">
+		</table>
+		<div id="reply_disp">
+		</div>
+		<div id="reply">
+		</div>
+			
+			<script>
+				mid=localStorage.getItem("mid");
+				send_email=null;
+				recv_email=null;
+				reply_id=null;
+				time=null;
+				email=localStorage.getItem("email");
+				function createTR(){var tr=document.createElement("tr");return tr;}
+				function createTD(data)
+				{
+					var td=document.createElement("td");
+					if(data!=null)
+						td.innerHTML=data;
+					return td;
+				}
+				//script to display main mail
+				function load_main_thread()
+				{
+					var  xhr=new XMLHttpRequest();
+					xhr.open("GET","/display_mail/"+mid,true);
+					xhr.onload=function()
+					{
+						if(xhr.status==200)
+						{	
+							data=JSON.parse(xhr.responseText)[0];
+							//console.log(data);
+							var main_thread=document.getElementById("main_thread");	
+							
+							var tr=createTR();
+							var td=createTD("From");
+							tr.appendChild(td);
+							td=createTD(data["send_email"]);
+							tr.appendChild(td);
+							main_thread.appendChild(tr);
+
+
+							tr=createTR();
+							td=createTD(data["date"]);
+							td.setAttribute("colspan",'2');
+							tr.appendChild(td);
+							main_thread.appendChild(tr);
+
+							tr=createTR();
+							td=createTD("Subject:");
+							tr.appendChild(td);
+							td=createTD(data["subject"]);
+							tr.appendChild(td);
+							main_thread.appendChild(tr);
+
+							tr=createTR();
+							td=createTD(null);
+							td.setAttribute("colspan",'2');
+							// document.writeln("<tr><td>FROM</td><td>"+data["send_email"]+"</td></tr>");
+							// document.writeln("<tr><td>To</td><td>"+data["recv_email"]+"</td></tr>");
+							// document.writeln("<tr><td colspan='2'>"+data["date"]+"</td></td></tr>");
+							// document.writeln("<tr><td colspan='2'>"+data["subject"]+"</td></tr>");
+							// document.writeln("<tr><td id='mail_body' colspan='2'></td></tr>");
+
+							//sender becomes receiver and receiver becomes sender
+
+							//send_email=data["recv_email"];
+							
+
+						// var mail_body=document.getElementById("mail_body");
+						parser=new DOMParser();
+						body=parser.parseFromString(data["body"],'text/xml');
+						// mail_body.appendChild(body);
+						
+						td.appendChild(body.documentElement);
+						tr.appendChild(td);
+						main_thread.appendChild(tr);
+
+						//generate the reply form onlu after constructing the main thread (the  emails are coming null theats why)
+						// mark_main_thread_read();
+						time=setTimeout(display_reply);
+						generate_reply_form();
+
+						}
+						else
+						{
+							alert("error occured!!");
+						}
+					}
+					xhr.send();
+
+				}
+
+			//function  to upload comments
+			function generate_reply_form()
+			{	//alert("here");
+				var form=document.createElement("form");
+				form.id="reply_form";
+				// form.setAttribute("method","post");
+				// form.setAttribute("action","/reply");
+				// form.setAttribute("target","hframe");
+				
+				console.log(send_email);
+				console.log(recv_email);
+				
+				var se=document.createElement("input");
+				se.setAttribute("type","hidden");
+				se.setAttribute("name","send_email");
+				se.setAttribute("value",localStorage.getItem("email"));
+				form.appendChild(se);
+
+
+				var mail_id=document.createElement("input");
+				mail_id.setAttribute("type","hidden");
+				mail_id.setAttribute("name","mid");
+				mail_id.setAttribute("value",mid);
+				form.appendChild(mail_id);
+
+				var textarea=document.createElement("textarea");
+				textarea.setAttribute("name","body");
+				textarea.setAttribute("rows","4");
+				textarea.setAttribute("cols","50");
+				form.appendChild(textarea);
+				
+				var submit=document.createElement("input");
+				submit.setAttribute("type","submit");
+				submit.setAttribute("value","reply");
+				submit.classList="reply-button";
+				form.appendChild(submit);
+
+				reply=document.getElementById("reply");
+				reply.appendChild(form);
+
+				form.onsubmit=function(e)
+				{	e.preventDefault();
+					xhr=new XMLHttpRequest()
+					// form=document.getElementById
+					formData=new FormData(form);
+					xhr.open("POST","/reply",true);
+					xhr.onload=function(){
+						if(this.status==200)
+						{
+							console.log("reply sent");
+						}
+						else
+						{
+							alert("failed to send reply");
+						}
+					}
+					xhr.send(formData);
+					return false;
+
+				}
+
+			}
+			
+			function display_reply()
+			{	//alert("herre");
+				var div_reply=document.getElementById("reply_disp");
+				xhr=new XMLHttpRequest();
+				xhr.open("GET","/reply?mid="+mid+"&id="+reply_id,true);
+				xhr.onload=function()
+				{
+					if(this.status==200)
+					{
+						var data=JSON.parse(this.responseText);
+						for(i=0;i<data.length;i++)
+						{	
+							var table=document.createElement("table");
+							table.setAttribute("border","1");
+							table.id=data[i]["id"];
+							var tr=createTR();
+							var td=createTD(null);
+							td.innerHTML=data[i]["send_email"]
+							tr.appendChild(td);
+							
+							td=createTD(data[i]["date"]);
+							tr.appendChild(td);
+							//recording the latest date
+							date=data[i]["date"];
+							table.appendChild(tr);
+
+							tr=createTR();
+							td=createTD(data[i]["body"]);
+							td.setAttribute("colspan","2");
+
+							tr.appendChild(td);
+							table.appendChild(tr);
+							
+							div_reply.appendChild(table);
+							reply_id=data[i]["id"];
+						}
+						
+
+					}
+					//long pooling
+					xhr.abort()
+					clearTimeout(time);
+					time=setTimeout(display_reply,1000);
+				}
+				xhr.send();
+			}
+
+			
+		</script>
+		
+	</body>
+</html>
