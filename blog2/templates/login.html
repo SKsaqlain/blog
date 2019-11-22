@@ -4,14 +4,14 @@
 	<title>logIn</title>
 	<style>
 		body{
-			background-image: url("/static/img/mail.png");
+			background-image: url("/static/img/mail.jpg");
 			background-size: cover;
 		}
 		.login-div{
-			background-color:rgb(24, 211, 218);
-			
+			background-color:lightgrey;
+			opacity: 0.9;
 			width:300px;
-			height:300px;
+			height:390px;
 			border-radius: 25px;
 			padding: 25px;
 			margin-left: 5%;
@@ -29,7 +29,7 @@
 		}
 
 		.loginbutton{
-			background-color: rgb(61, 170, 61);
+			background-color: teal;
 			border-radius : 10px;
 			border-collapse: collapse;
 			border: none;
@@ -110,8 +110,10 @@
 			<input type="password" name="password" id="password" required class="text" placeholder="Password" size="20"><br/>
 			<input type="button" value="Login!" onclick="send_form()" class="loginbutton"><br/>
 			<p style="font-family:'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;text-align: center"><span style="margin: 0px auto;display: block;">New User?&nbsp;&nbsp;<a href="/create_account">Create Account</a></span> </p>
-	</form>
+			<input type="button" value="Submit Feedback" onclick="window.location.assign('/redirect_feedback'); return false;" class="loginbutton"><br/>
+		</form>
 	</div>
+
 </body>
 
 </html> 

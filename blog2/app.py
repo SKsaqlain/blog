@@ -47,6 +47,10 @@ def redirect_login():
 def redirect_create_account():
 	return render_template("create_account.html")
 
+@app.route("/redirect_feedback")
+def redirect_feedback():
+	return render_template("feedback.html")
+
 @app.route("/home")
 def redirect_home():
 	return  render_template("home.html")

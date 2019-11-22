@@ -11,9 +11,10 @@ body{
 	background-image: url("/static/img/mail.png");
 	background-size: cover;
 }
-.rmail-div{
-	background-color:rgb(24, 211, 218);
-	
+.rmail-div,#blogger_display{
+	/*background-color:rgb(24, 211, 218);*/
+	background-color:lightgrey;
+	opacity: 0.9;
 	width:90%;
 	height:80%;
 	border-radius: 25px;
@@ -22,9 +23,12 @@ body{
 	margin-top:02%;
 	/* opacity: 0.8; */
 }
-
+select{
+	display: block;
+	align-content:center;
+}
 button{
-	background-color: rgb(61, 170, 61);
+	background-color: teal;
 	border-radius : 10px;
 	border-collapse: collapse;
 	border: none;
@@ -56,6 +60,12 @@ button{
 .uncheck{
     color:white;
 }
+.sendmail:hover{
+	cursor:pointer;
+	font-weight: 800;
+	font-size: 20px;
+	text-shadow: 2px 2px 5px red;
+}
 table{
     border-bottom:2px solid grey;
 	display: block;
@@ -64,13 +74,13 @@ table{
 	font-weight: 400;
 	text-align: center;
 }
-.rmail-div:hover{background-color: rgb(0, 255, 242);}
+.rmail-div:hover{background-color: gray;color: white}
 </style>
 
 </head>
 <body >
 	<div id="blogger_display">
-		<form  id="subscribe-form">
+		<form  id="subscribe-form" style="margin:0px auto;display: block">
 			
 		</form>
 	</div>
@@ -132,6 +142,7 @@ function load_subscriber_info()
 			select.setAttribute("id","blogger");
 			select.setAttribute("name","blogger");
 			select.setAttribute("required",true);
+
 			for(var i=0;i<data.length;i++)
 			{
 				var option=document.createElement("option");
@@ -191,6 +202,7 @@ function getlatestdata()
                             td.width="100px";
 							td.id=mail["id"];
 							td.innerHTML=mail["send_email"];
+							td.classList="sendmail";
 							td.onclick=function ()
 							{	var url="/redirect_display_mail";
 								localStorage.setItem("mid",this.id);
@@ -243,12 +255,12 @@ function getlatestdata()
 							}
 							tr.appendChild(td);
 
-
-							td=document.createElement("button");
-							td.width="200px";
-							td.innerHTML=mail["dislikes"]+" Dislikes";
-							td.id=mail["id"];
-							td.onclick=function()
+							td=document.createElement("td");
+							bt=document.createElement("button");
+							bt.width="200px";
+							bt.innerHTML=mail["dislikes"]+" Dislikes";
+							bt.id=mail["id"];
+							bt.onclick=function()
 							{	var previous=this;
 								var xhr=new XMLHttpRequest();
 								xhr.open("GET","/dislike/"+this.id+"/"+email,true);
@@ -268,6 +280,7 @@ function getlatestdata()
 								xhr.send();
 								
 							}
+							td.appendChild(bt);
 							tr.appendChild(td);
 
 							
