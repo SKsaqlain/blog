@@ -267,6 +267,55 @@ def subscribeToBlog(email,blogger_email):
 	return resp
 
 
+@app.route("/unsubscribeToBlog/<email>/<blogger_email>",methods=["POST"])
+def unsubscribeToBlog(email,blogger_email):
+	print(email)
+	# blogger_email=request.form["bloggers"]
+	print(blogger_email)
+	db=pymysql.connect('127.0.0.1','root','',"blog")
+	cursor=db.cursor()
+	sql="select * from subscribe where recv_email='%s' and blogger_email='%s'"%(email,blogger_email)
+	resp=" "
+	if(cursor.execute(sql)):
+		sql="delete from subscribe where recv_email='%s' and blogger_email='%s'"%(email,blogger_email)
+		cursor.execute(sql)
+		db.commit()
+		resp=jsonify()
+		resp.status_code=200
+	else:
+		resp=jsonify()
+		resp.status_code=400
+		
+	cursor.close()
+	db.close()
+	return resp
+
+@app.route("/getSubscription/<email>",methods=['GET'])
+def getSubscription(email):
+	print(email)
+	# blogger_email=request.form["bloggers"]
+	print(email)
+	db=pymysql.connect('127.0.0.1','root','',"blog")
+	cursor=db.cursor()
+	sql="select * from subscribe where recv_email='%s'"%(email)
+	resp=" "
+	if(cursor.execute(sql)):
+		rows=cursor.fetchall()
+		message=[]
+		for blogger in  rows:
+			message.append(dict(zip(subscribe_colummn,blogger)))
+		
+		resp=jsonify(message)
+		resp.status_code=200
+	else:
+		resp=jsonify()
+		resp.status_code=400
+		
+	cursor.close()
+	db.close()
+	return resp	
+
+
 #get a specific mail used to display mail in a new window.
 @app.route("/display_mail/<mid>",methods=["GET"])
 def display_mail(mid):
