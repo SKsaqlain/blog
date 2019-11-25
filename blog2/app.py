@@ -37,6 +37,7 @@ blogger_column=["id","email"]
 comment_column=["id","bid","send_email","recv_email","body","date"]
 subscribe_colummn=["rev_email","blogger_email"]
 user_column=["email","username","password","phonenumber","blockstate"]
+category_column=['id','category']
 
 @app.route("/")
 def redirect_login():
@@ -58,6 +59,9 @@ def redirect_home():
 @app.route("/compose")
 def compose():
 	return render_template("compose.html")
+@app.route("/redirect_display_blog_category")
+def redirect_display_blog_category():
+	return render_template("blog_category_display.html")
 
 #200-success #400-login failed.
 @app.route("/login",methods=['POST'])
@@ -151,6 +155,59 @@ def getData(email):
 	#print(message)
 	resp=jsonify(message)
 	
+	cursor.close()
+	db.close()
+	return resp
+
+
+@app.route('/get_category_data/<category>',methods=['GET'])
+def get_category_data(category):
+	print(category)
+	#query to extract all the emails received
+	db=pymysql.connect('127.0.0.1','root','',"blog")
+	cursor=db.cursor()
+	sql="select * from blog where category_id in (select id from category where category='%s')"%(category)
+	cursor.execute(sql)
+	rows=cursor.fetchall()
+	resp=jsonify()
+	message=[]
+	
+	if(len(rows)>0):
+		# print(type(rows))
+		for each_mail in rows:
+			message.append(dict(zip(blog_column,each_mail)))
+			
+		resp.status_code=200
+	else:
+		resp.status_code=400
+	#print(message)
+	resp=jsonify(message)
+	
+	cursor.close()
+	db.close()
+	return resp
+
+@app.route('/get_category',methods=['GET'])
+def get_category():
+	db=pymysql.connect('127.0.0.1','root','',"blog")
+	cursor=db.cursor()
+	sql="select * from category"
+	if(cursor.execute(sql)):
+		rows=cursor.fetchall()
+	else:
+		rows=[]
+	
+	if(len(rows)>0):
+		message=[]
+		for blogger in  rows:
+			message.append(dict(zip(category_column,blogger)))
+		print(message)
+		resp=jsonify(message)
+		resp.status_code=200
+		
+	else:
+		resp=jsonify()
+		resp.status_code=400
 	cursor.close()
 	db.close()
 	return resp
