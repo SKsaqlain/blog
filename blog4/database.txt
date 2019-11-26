@@ -1,0 +1,22 @@
+create database
+create database blog;
+use blog;
+
+create table user(email VARCHAR(100) PRIMARY KEY ,username VARCHAR(100) NOT NULL,password VARCHAR(100) NOT NULL,phonenumber INT,blockstate INT DEFAULT 0);
+
+create table category(id INT AUTO_INCREMENT PRIMARY KEY,category VARCHAR(50));
+
+
+
+create table blog(id INT AUTO_INCREMENT PRIMARY KEY,blogger_id int,send_email VARCHAR(20) NOT NULL,subject VARCHAR(10),body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,likes INT DEFAULT 0,dislikes INT DEFAULT 0,category_id INT); 
+
+
+create table comment(id INT AUTO_INCREMENT PRIMARY KEY,bid INT,send_email VARCHAR(20) NOT NULL, recv_email VARCHAR(20) NOT NULL,body VARCHAR(500),date TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL, FOREIGN KEY(bid) REFERENCES blog(id) on DELETE CASCADE); 
+
+
+create table blogger(id INT AUTO_INCREMENT PRIMARY KEY,email VARCHAR(20))
+
+create table subscribe(recv_email VARCHAR(20),blogger_email VARCHAR(20));
+
+create table likes(email varchar(20) NOT NULL,bid int NOT NULL);
+create table dislikes(email varchar(20) NOT NULL,bid int NOT NULL);

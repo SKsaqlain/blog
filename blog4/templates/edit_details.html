@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Edit Details</title>
+	<style>
+			body{
+				background-image: url("/static/img/mail_0.png");
+				background-size: cover;
+			}
+			.signup-div{
+				/*background-color:rgb(24, 211, 218);*/
+				background-color:lightgrey;
+				opacity: 0.9;
+				width:350px;
+				height:350px;
+				border-radius: 25px;
+				padding: 25px;
+				margin-left: 5%;
+				margin-top:10%;
+			}
+			.text{
+				font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+				width: 200px;
+				padding:10px;
+				margin: 20px auto;
+				display: block;
+			
+				border: none;
+				border-radius: 10px;
+			}
+	
+			.signbutton{
+				background-color: rgb(61, 170, 61);
+				border-radius : 10px;
+				border-collapse: collapse;
+				border: none;
+				font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+				color:white;
+				padding:10px;
+				margin: 0px auto;
+				display: block;
+			
+				
+				
+			}
+		.ribbon{
+	position: absolute;
+}
+.ribbon-6{
+	width:100%;
+	height:60px;
+	background: skyblue;
+}
+
+button{
+	background-color: teal;
+	border-radius : 10px;
+	border-collapse: collapse;
+	border: none;
+	font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+	color:white;
+	padding:10px;
+	margin: 20px auto;
+	display: block;
+	cursor: pointer;
+	
+	
+}
+		</style>
+</head>
+<body>
+		<div class="wrapper" >
+		<div class="conatiner">
+			<div class="ribbon-6 ribbon">
+  					<button onclick="signout()" style="margin-top: 15px;margin-left: 92%;background:red";>Signout</button>
+			</div>s
+		</div>
+	</div>
+	<div class="signup-div">
+	<form method="post" id="form" action="">
+		<input type="name" name="username" id="username" required class="text" placeholder="Username"><br/>
+		<input type="password" name="password" id="password" required class="text" placeholder="Password"><br/>
+		<input type="password" name="password2" id="password2" required class="text" placeholder="Confirm Password" onblur="checkpassword()"><br/>
+		<input type="text" name="phonenumber" id="phonenumber"  required class="text" placeholder="phonenumber" max-size="10"><br/>
+		<input type="submit" value="Edit values!" class="signbutton"><br/>
+		
+	</form>
+</div>
+</body>
+
+<script type="text/javascript">
+	function signout()
+{
+	localStorage.clear();
+	window.location.assign('/signout');
+}
+	function checkpassword()
+	{
+		var pass1=document.getElementById("password").value;
+		var pass2=document.getElementById("password2").value;
+		var n=pass1.localeCompare(pass2);
+		if(n!=0)
+		{
+			alert("Password doesn't match");
+		}
+		else
+		{
+			var form=document.getElementById("form")
+			var e=document.createElement("input")
+			e.type="hidden";
+			e.name="email";
+			e.value=localStorage.getItem("email");
+			form.appendChild(e);
+			document.getElementById("form").action='/editdetails';
+		}
+
+	}
+	</script>
+</html> 
